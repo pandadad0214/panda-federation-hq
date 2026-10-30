@@ -593,16 +593,18 @@ function decide(b) {
   if (b.pauseUntil && performance.now() < b.pauseUntil) return;
   if (b.loc !== 'lounge') go(b, 'lounge');
 }
+const PAPER_GEO = new THREE.BoxGeometry(0.26, 0.008, 0.32);
 function dropPaper() {
-  const p = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.008, 0.32), mat('#f4efe4'));
+  const p = new THREE.Mesh(PAPER_GEO, mat('#f4efe4')); // shared geometry + cached material: nothing to dispose
   p.position.set(TRAY[0] + rand(-0.04, 0.04), 0.8 + trayPapers.children.length * 0.01, TRAY[1] + rand(-0.03, 0.03)); p.rotation.y = rand(-0.2, 0.2);
   trayPapers.add(p); if (trayPapers.children.length > 8) trayPapers.remove(trayPapers.children[0]);
 }
 const SPEED = 2.4;
+const STEP_V = new THREE.Vector3();
 function step(b, dt) {
   if (b.path.length) {
     const target = b.path[0], pos = b.root.position;
-    const d = target.clone().sub(pos); d.y = 0; const dist = d.length();
+    const d = STEP_V.copy(target).sub(pos); d.y = 0; const dist = d.length();
     if (dist < 0.02) b.path.shift();
     else {
       pos.addScaledVector(d.normalize(), Math.min(dist, SPEED * dt));
@@ -664,10 +666,14 @@ function applyStates(src, isSim) {
   renderPanel(src, isSim);
   if (!isSim) firstLoad = false;
 }
+let polling = false, pollTimer = 0;
 async function poll() {
+  if (polling) return; polling = true; clearTimeout(pollTimer);
+  let ok = false;
+  const ac = new AbortController(), to = setTimeout(() => ac.abort(), 12000);
   try {
-    const r = await fetch('/api/state', { cache: 'no-store', credentials: 'same-origin' });
-    if (r.status === 401) { location.href = '/login'; return; }
+    const r = await fetch('/api/state', { cache: 'no-store', credentials: 'same-origin', signal: ac.signal });
+    if (r.status === 401) { location.replace('/login'); return; }
     if (!r.ok) throw new Error('HTTP ' + r.status);
     live = await r.json();
     drawUsage(live.usage);
@@ -678,13 +684,19 @@ async function poll() {
     feedText.textContent = active ? `live · ${active} active` : 'live · all idle';
     warnEl.hidden = !live.feed.quiet;
     if (live.feed.quiet) warnEl.textContent = 'Status feed has been quiet for 45+ minutes (no heartbeat).';
+    ok = true;
   } catch (e) {
     feedEl.className = 'feed bad'; feedText.textContent = 'feed error';
     warnEl.hidden = false; warnEl.textContent = 'Status feed unreachable — showing last known state.';
     if (firstLoad) applyStates({}, false);
+  } finally {
+    clearTimeout(to); polling = false;
+    // keep polling forever; retry sooner after a network blip
+    pollTimer = setTimeout(poll, ok ? 15000 : 5000);
   }
 }
-poll(); setInterval(poll, 15000);
+poll();
+addEventListener('online', () => poll());
 document.addEventListener('visibilitychange', () => { if (!document.hidden) poll(); });
 
 // ---------- simulate work (browser only, never written to the API) ----------
@@ -792,8 +804,9 @@ function adapt(dt) {
 const ROOM_PTS = []; for (const x of [-20.3, 20.3]) for (const z of [-14.3, 14.3]) for (const y of [-0.7, WH + 0.1]) ROOM_PTS.push(V(x, z).setY(y));
 function frameCamera() {
   const wide = innerWidth > 900;
-  const panelW = wide && panel && !panel.hidden ? panel.offsetWidth + 24 : 0;
-  const top = wide ? 64 : 70, bottom = wide ? 70 : 150;
+  const fs = document.body.classList.contains('fs');
+  const panelW = wide && panel && panel.offsetWidth > 0 ? panel.offsetWidth + 24 : 0;
+  const top = fs ? 40 : wide ? 64 : 70, bottom = fs ? 16 : wide ? 70 : 150;
   const availW = innerWidth - panelW - (wide ? 40 : 12), availH = innerHeight - top - bottom;
   const tgt = V(0, 0).setY(1.0);
   camera.position.copy(tgt).addScaledVector(ISO_DIR, 120); camera.up.set(0, 1, 0); camera.lookAt(tgt); camera.updateMatrixWorld();
@@ -815,6 +828,34 @@ function resize() {
 }
 addEventListener('resize', resize); resize();
 
+// ---------- fullscreen (always-on display) ----------
+const fsBtn = document.getElementById('fsbtn'), root = document.documentElement;
+const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement;
+const fsOK = !!(root.requestFullscreen || root.webkitRequestFullscreen);
+function toggleFs() {
+  if (fsEl()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  else { const r = (root.requestFullscreen || root.webkitRequestFullscreen).call(root, { navigationUI: 'hide' }); if (r && r.catch) r.catch(() => {}); }
+}
+let idleT = 0;
+function wake() { document.body.classList.remove('idle'); clearTimeout(idleT); if (fsEl()) idleT = setTimeout(() => document.body.classList.add('idle'), 3000); }
+function onFsChange() {
+  const on = !!fsEl(); document.body.classList.toggle('fs', on);
+  fsBtn.title = on ? 'Exit fullscreen (F or Esc)' : 'Fullscreen (F)'; fsBtn.setAttribute('aria-label', on ? 'Exit fullscreen' : 'Enter fullscreen');
+  wake(); resize(); requestAnimationFrame(resize); // re-fit once the browser settles on the monitor size
+}
+if (fsOK) {
+  fsBtn.hidden = false;
+  fsBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleFs(); fsBtn.blur(); });
+  document.addEventListener('fullscreenchange', onFsChange); document.addEventListener('webkitfullscreenchange', onFsChange);
+  addEventListener('keydown', (e) => {
+    if ((e.key === 'f' || e.key === 'F') && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey && !/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) { e.preventDefault(); toggleFs(); }
+  });
+  addEventListener('pointermove', wake, { passive: true });
+}
+// GPU resets (driver update, sleep/wake): reload once the context is back instead of showing a frozen frame
+renderer.domElement.addEventListener('webglcontextlost', (e) => e.preventDefault());
+renderer.domElement.addEventListener('webglcontextrestored', () => location.reload());
+
 // ---------- loop ----------
 const clock = new THREE.Clock();
 let scrAcc = 0, ledAcc = 0;
@@ -832,4 +873,4 @@ function loop() {
   requestAnimationFrame(loop);
 }
 loop();
-window.__hq = { bots, live: () => live, fx };
+window.__hq = { bots, live: () => live, fx, toggleFs, onFsChange };

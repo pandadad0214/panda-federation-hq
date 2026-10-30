@@ -35,8 +35,9 @@ async function validSession(env, req) {
   if (!m) return false;
   const [exp, sig] = m[1].split('.');
   if (!exp || !sig || +exp < Date.now()) return false;
-  return timingSafeEq(sig, await sign(env, 'exp:' + exp));
+  return timingSafeEq(sig, await sign(env, 'exp:' + exp)) ? +exp : false; // expiry (ms) when valid
 }
+const sessionCookie = (v) => `${COOKIE}=${v}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SESSION_DAYS * 86400}`;
 function bearerOk(env, req) {
   const h = req.headers.get('Authorization') || '';
   return !!env.STATUS_TOKEN && h.startsWith('Bearer ') && timingSafeEq(h.slice(7).trim(), env.STATUS_TOKEN);
@@ -115,7 +116,7 @@ export default {
         const form = await req.formData().catch(() => null);
         const pw = form && form.get('password');
         if (typeof pw === 'string' && timingSafeEq(pw, env.SITE_PASSWORD)) {
-          const cookie = `${COOKIE}=${await makeSession(env)}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${SESSION_DAYS * 86400}`;
+          const cookie = sessionCookie(await makeSession(env));
           return new Response(null, { status: 303, headers: { Location: '/', 'Set-Cookie': cookie, 'cache-control': 'no-store' } });
         }
         await new Promise((r) => setTimeout(r, 600));
@@ -128,13 +129,19 @@ export default {
     }
 
     // --- everything else needs the session cookie ---
-    if (!(await validSession(env, req))) {
+    const sessExp = await validSession(env, req);
+    if (!sessExp) {
       if (p.startsWith('/api/')) return json({ error: 'login required' }, 401);
       return new Response(null, { status: 302, headers: { Location: '/login', 'cache-control': 'no-store' } });
     }
     if (p === '/api/state') {
       if (req.method !== 'GET') return json({ error: 'method not allowed' }, 405);
-      return stub(env).fetch('https://do/state');
+      const res = await stub(env).fetch('https://do/state');
+      // rolling session: an open office (polling /api/state) re-signs its cookie at most once a day, so it never logs out
+      if (sessExp - Date.now() > (SESSION_DAYS - 1) * 864e5) return res;
+      const out = new Response(res.body, res);
+      out.headers.append('Set-Cookie', sessionCookie(await makeSession(env)));
+      return out;
     }
     const res = await env.ASSETS.fetch(req);
     const out = new Response(res.body, res);
