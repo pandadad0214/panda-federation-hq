@@ -65,7 +65,22 @@ html,body{margin:0;height:100%;overflow:hidden;background:#070b16;color:#e6e8ef;
 #fsbtn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 #fsbtn .co,body.fs #fsbtn .ex{display:none}
 body.fs #fsbtn .co{display:block}
-body.fs #panel,body.fs #bar,body.fs #hud .title,body.fs #simlabel{display:none}
+body.fs #bar,body.fs #hud .title,body.fs #simlabel{display:none}
+#team .ns{display:none}
+/* fullscreen mini panel: same live data, about a quarter of the area, under the toggle */
+body.fs #panel{top:50px;right:12px;bottom:auto;width:172px;gap:6px;overflow:hidden;pointer-events:none}
+body.fs #panel section{padding:7px 9px 4px;border-radius:10px;background:rgba(16,21,34,.86)}
+body.fs #panel h2{font-size:10.5px;margin:0 0 3px}
+body.fs #team li{align-items:center;gap:6px;padding:2px 0;border-top:0}
+body.fs #team li>i{width:9px;height:9px;margin:0;box-shadow:none}
+body.fs #team b{font-size:11px;font-weight:600}
+body.fs #team .nf,body.fs #team small,body.fs #team em{display:none}
+body.fs #team .ns{display:inline}
+body.fs .chip{font-size:10px;margin:0}
+body.fs #activity li{font-size:10px;padding:2px 0;gap:5px;line-height:1.25}
+body.fs #activity li:nth-child(n+3){display:none}
+body.fs #activity time{width:auto}
+body.fs #activity li>div{overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 body.fs.idle #fsbtn{opacity:0}
 body.fs.idle,body.fs.idle canvas{cursor:none!important}
 @media (max-width:900px){

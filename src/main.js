@@ -122,14 +122,17 @@ await Promise.all([
 const KMAT = { wood: '#c98c55', woodDark: '#8a5a36', metal: '#2f3540', metalDark: '#1f232b', metalMedium: '#59616d', metalLight: '#c9ced6',
   carpet: '#3a8f8a', carpetWhite: '#e8e2d6', carpetDarker: '#2b6b67', plant: '#4fa356', lamp: '#ffe6b0', _defaultMat: '#c98c55' };
 // place a furniture model: footprint centered on (x,z), on the floor, rotated ry. recolor: {matName: color}
+const propMats = new Map();
 function prop(name, x, z, ry = 0, { s = KIT, y = 0, recolor = {}, parent = scene, shadow = true } = {}) {
   const src = models[name]; if (!src) return null;
   const inner = src.clone(true);
   inner.traverse((o) => {
     if (!o.isMesh) return;
-    const n = o.material.name; const col = recolor[n] || KMAT[n];
-    o.material = new THREE.MeshStandardMaterial({ color: col || o.material.color, roughness: n === 'lamp' ? 0.6 : 0.85, metalness: 0,
-      emissive: n === 'lamp' ? '#ffcf87' : '#000000', emissiveIntensity: n === 'lamp' ? 1.6 : 0 });
+    const n = o.material.name; const col = recolor[n] || KMAT[n] || '#' + o.material.color.getHexString();
+    const key = n + '|' + col; // shared per (slot, color): props never mutate their materials
+    if (!propMats.has(key)) propMats.set(key, new THREE.MeshStandardMaterial({ color: col, roughness: n === 'lamp' ? 0.6 : 0.85, metalness: 0,
+      emissive: n === 'lamp' ? '#ffcf87' : '#000000', emissiveIntensity: n === 'lamp' ? 1.6 : 0 }));
+    o.material = propMats.get(key);
     o.castShadow = shadow; o.receiveShadow = true;
   });
   inner.scale.setScalar(s);
@@ -268,18 +271,52 @@ glassWall(-12, -14, -12, -3); glassWall(-20, -3, -14.7, -3); glassWall(-13.1, -3
 
 // ---------- desks ----------
 const deskScreens = {};
-function workstation(id, x, z) { // chair at (x,z) facing +z, desk in front
+// shared bits for desk perks (one geometry/material each, reused on every desk)
+const MUG_GEO = new THREE.CylinderGeometry(0.07, 0.06, 0.15, 16), MUG_HANDLE = new THREE.TorusGeometry(0.045, 0.014, 6, 12);
+const TROPHY_CUP = new THREE.CylinderGeometry(0.11, 0.05, 0.17, 16), TROPHY_STEM = new THREE.CylinderGeometry(0.025, 0.025, 0.09, 8), TROPHY_BASE = new THREE.BoxGeometry(0.17, 0.06, 0.17);
+const GOLD = mat('#e8b93a', { roughness: 0.4, metalness: 0.3 });
+function mug(color, x, y, z, rot = 0) {
+  const g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = rot; scene.add(g);
+  const m = new THREE.Mesh(MUG_GEO, mat(color, { roughness: 0.55 })); m.position.y = 0.075; m.castShadow = true; g.add(m);
+  const h = new THREE.Mesh(MUG_HANDLE, m.material); h.position.set(0.075, 0.08, 0); g.add(h);
+  return g;
+}
+function trophy(x, y, z, s = 1) {
+  const g = new THREE.Group(); g.position.set(x, y, z); g.scale.setScalar(s); scene.add(g);
+  const b = new THREE.Mesh(TROPHY_BASE, mat('#3a2a1e')); b.position.y = 0.03; const st = new THREE.Mesh(TROPHY_STEM, GOLD); st.position.y = 0.105;
+  const c = new THREE.Mesh(TROPHY_CUP, GOLD); c.position.y = 0.235; for (const m of [b, st, c]) { m.castShadow = true; g.add(m); }
+}
+const DESK_TOP = 0.91;
+function workstation(id, x, z, color) { // chair at (x,z) facing +z, desk in front
+  const boss = id === 'overlord';
   const dz = z + 1.15;
-  prop('desk', x, dz, Math.PI);
-  const mon = prop('computerScreen', x, dz + 0.12, Math.PI, { y: 0.91 });
-  prop('computerKeyboard', x, dz - 0.18, Math.PI, { y: 0.91 });
-  prop('chairDesk', x, z - 0.1, 0, { shadow: true }); // Kenney chairs face +z: seat toward the desk, backrest behind the bot
+  const desk = prop('desk', x, dz, Math.PI, boss ? { recolor: { wood: '#7a4a2a', woodDark: '#4e2c18' } } : {});
+  if (boss && desk) desk.scale.x = 1.45; // wide executive desk (depth unchanged so the chair still tucks in)
+  const mon = prop('computerScreen', x, dz + 0.12, Math.PI, { y: DESK_TOP });
+  prop('computerKeyboard', x, dz - 0.18, Math.PI, { y: DESK_TOP });
+  prop('chairDesk', x, z - 0.1, 0, { shadow: true, recolor: boss ? { carpet: '#c0282f', metalMedium: '#2a1d1d' } : {} }); // Kenney chairs face +z
   // monitor glow surface (faces the bot, -z)
   const scr = new THREE.Mesh(new THREE.PlaneGeometry(0.78, 0.46), new THREE.MeshBasicMaterial({ color: '#2a3a4c' }));
   scr.position.set(x, 1.3, dz + 0.12 - 0.08); scr.rotation.y = Math.PI; scene.add(scr);
   deskScreens[id] = scr;
+  if (boss) {
+    // plush high-back: tufted red headrest above the chair back
+    rbox(0.66, 0.5, 0.14, '#c0282f', x, 1.2, z - 0.47, scene, { roughness: 0.95 }, 0.07);
+    rbox(0.72, 0.06, 0.16, '#e8b93a', x, 1.47, z - 0.47, scene, { roughness: 0.4, metalness: 0.3 }, 0.02);
+    // desk lamp, gold nameplate facing visitors, boss mug
+    prop('lampRoundFloor', x - 1.05, dz + 0.15, 0, { s: 0.75, y: DESK_TOP });
+    const np = rbox(0.62, 0.13, 0.05, '#2a1a12', x + 0.75, DESK_TOP + 0.07, dz + 0.42, scene, {}, 0.02);
+    const npTex = canvasTex(512, 108, (g, w, h) => { g.fillStyle = '#2a1a12'; g.fillRect(0, 0, w, h); g.strokeStyle = '#e8b93a'; g.lineWidth = 8; g.strokeRect(6, 6, w - 12, h - 12);
+      g.fillStyle = '#f2cf63'; g.font = `800 52px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('OVERLORD BOSS', w / 2, h / 2 + 2); });
+    const npFace = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.12), new THREE.MeshBasicMaterial({ map: npTex })); npFace.position.set(0, 0, 0.027); np.add(npFace);
+    mug(color, x + 0.95, DESK_TOP, dz - 0.15, -0.6);
+  } else {
+    // trickle-down perks: a little plant and a mug in the bot's own color
+    prop('plantSmall1', x + 0.72, dz + 0.1, 0, { s: 1.5, y: DESK_TOP });
+    mug(color, x - 0.7, DESK_TOP, dz - 0.12, 0.5);
+  }
 }
-for (const id in DESKS) { const [x, z] = DESKS[id]; workstation(id, x, z); }
+for (const id in DESKS) { const [x, z] = DESKS[id]; workstation(id, x, z, TEAM.find((t) => t.id === id).color); }
 // lead's in-tray and side cabinet
 const trayBase = rbox(0.5, 0.06, 0.38, '#2b303a', TRAY[0], 0.92, TRAY[1] + 0.0);
 prop('sideTable', TRAY[0], TRAY[1], 0, { s: 1.9 }); trayBase.position.y = 0.74;
@@ -305,6 +342,49 @@ function crest(url, x, y, s) {
   m.position.set(x, y, -13.92); scene.add(m);
 }
 crest('/crest-main.jpg', -16, 2.3, 1.5);
+rbox(1.82, 1.82, 0.04, '#e8b93a', -16, 2.3, -13.985, scene, { roughness: 0.4, metalness: 0.3 }, 0.03); // gold trim behind the main crest
+
+// ---------- Overlord office glow-up ----------
+{ // round red rug with a gold rim under the boss desk (clear of the LEADERSHIP lettering at the back)
+  const rugTex = canvasTex(512, 512, (g, w) => { g.fillStyle = '#e8b93a'; g.beginPath(); g.arc(w / 2, w / 2, w / 2 - 2, 0, 7); g.fill();
+    g.fillStyle = '#a3222a'; g.beginPath(); g.arc(w / 2, w / 2, w / 2 - 22, 0, 7); g.fill();
+    g.strokeStyle = 'rgba(232,185,58,.55)'; g.lineWidth = 6; g.beginPath(); g.arc(w / 2, w / 2, w / 2 - 60, 0, 7); g.stroke(); });
+  const rug = new THREE.Mesh(new THREE.CircleGeometry(2.0, 48), new THREE.MeshStandardMaterial({ map: rugTex, transparent: true, roughness: 1, metalness: 0, polygonOffset: true, polygonOffsetFactor: -3 }));
+  rug.rotation.x = -Math.PI / 2; rug.position.set(-16.6, 0.024, -8.4); rug.receiveShadow = true; scene.add(rug);
+}
+// trophy case: second bookcase with gold trophies on top (kept off the back lettering band)
+const tcase = prop('bookcaseOpen', -19.3, -7.1, Math.PI / 2, { recolor: { wood: '#7a4a2a', woodDark: '#4e2c18' } });
+if (tcase) { const th = tcase.userData.size.y; trophy(-19.3, th, -7.55, 1.1); trophy(-19.3, th, -7.1, 1.35); trophy(-19.3, th, -6.65, 1.0); }
+// mini-fridge + coffee machine nook by the glass wall
+prop('kitchenFridgeLarge', -12.75, -12.0, -Math.PI / 2, { s: 1.25 });
+prop('sideTable', -12.75, -10.85, -Math.PI / 2, { s: 1.9 }); prop('kitchenCoffeeMachine', -12.75, -10.85, -Math.PI / 2, { s: 1.6, y: 0.74 });
+prop('pottedPlant', -19.3, -3.8, 0, { s: 2.6 });
+// two small square windows flanking the crest, view follows the time of day
+const bossWinTex = canvasTex(1024, 512, () => {});
+function drawBossWindows(mode) {
+  const { g, c } = bossWinTex.userData, w = c.width, h = c.height;
+  const [top, bot] = SKY[mode]; const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, top); gr.addColorStop(1, bot); g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  if (mode === 'night') { g.fillStyle = 'rgba(255,255,255,.8)'; for (let i = 0; i < 40; i++) g.fillRect((i * 389) % w, (i * 151) % (h * 0.5), 3, 3); g.fillStyle = '#f4f1dc'; g.beginPath(); g.arc(820, 110, 34, 0, 7); g.fill(); }
+  else { g.fillStyle = mode === 'day' ? '#fff6cf' : '#ffb27a'; g.beginPath(); g.arc(800, mode === 'day' ? 120 : 250, 46, 0, 7); g.fill();
+    if (mode === 'day') { g.fillStyle = 'rgba(255,255,255,.9)'; for (const [cx, cy] of [[180, 110], [560, 80]]) for (let k = 0; k < 3; k++) { g.beginPath(); g.ellipse(cx + k * 40, cy - (k % 2) * 12, 52, 22, 0, 0, 7); g.fill(); } } }
+  const hills = { day: ['#7cc46a', '#4f9e4c', '#3a7d3d'], evening: ['#6a5a7e', '#4b3f63', '#33294a'], night: ['#1d2a40', '#15203a', '#0e1628'] }[mode];
+  [[330, 120, 0], [380, 95, 1], [430, 70, 2]].forEach(([base, amp, k]) => { g.fillStyle = hills[k]; g.beginPath(); g.moveTo(0, h);
+    for (let x = 0; x <= w; x += 16) g.lineTo(x, base - Math.sin(x / (150 + k * 40) + k * 1.7) * amp * 0.5 - amp * 0.3); g.lineTo(w, h); g.fill(); });
+  bossWinTex.needsUpdate = true;
+}
+{
+  const S = 1.15, WIN_Y = 2.3, wm = new THREE.MeshBasicMaterial({ map: bossWinTex, color: new THREE.Color(1.15, 1.15, 1.15) });
+  [-18.35, -13.65].forEach((wx, i) => {
+    const geo = new THREE.PlaneGeometry(S, S); const uv = geo.attributes.uv; // each window shows its half of the landscape
+    for (let k = 0; k < uv.count; k++) uv.setX(k, uv.getX(k) * 0.5 + i * 0.5);
+    const pane = new THREE.Mesh(geo, wm); pane.position.set(wx, WIN_Y, -13.975); scene.add(pane);
+    const F = '#f1ece2', t = 0.09, d = 0.1, fz = -13.95;
+    box(S + 2 * t, t, d, F, wx, WIN_Y + S / 2 + t / 2, fz); box(S + 2 * t, t, d, F, wx, WIN_Y - S / 2 - t / 2, fz);
+    box(t, S, d, F, wx - S / 2 - t / 2, WIN_Y, fz); box(t, S, d, F, wx + S / 2 + t / 2, WIN_Y, fz);
+    box(0.04, S, 0.05, F, wx, WIN_Y, fz + 0.01); box(S, 0.04, 0.05, F, wx, WIN_Y, fz + 0.01); // muntins
+    box(S + 0.36, 0.06, 0.2, F, wx, WIN_Y - S / 2 - 0.1, -13.88); // sill
+  });
+}
 crest('/crest-samurai.jpg', -5.2, 2.3, 1.3);
 crest('/crest-samurai.jpg', 6, 2.3, 1.3);
 
@@ -621,7 +701,7 @@ function step(b, dt) {
 const panel = document.getElementById('panel');
 const teamEl = document.getElementById('team'), actEl = document.getElementById('activity'), actSec = document.getElementById('actsec');
 const STATE_LABEL = { working: 'Working', waiting: 'Needs you', error: 'Error', done: 'Done', idle: 'Idle' };
-teamEl.innerHTML = TEAM.map((t) => `<li data-id="${t.id}"><i style="background:${t.color}"></i><div><b>${t.name}</b><small>${t.dept}</small><em></em></div><span class="chip"></span></li>`).join('');
+teamEl.innerHTML = TEAM.map((t) => `<li data-id="${t.id}"><i style="background:${t.color}"></i><div><b><span class="nf">${t.name}</span><span class="ns">${t.short}</span></b><small>${t.dept}</small><em></em></div><span class="chip"></span></li>`).join('');
 const activity = { live: [], sim: [] }; const lastSeen = {};
 function renderPanel(src, isSim) {
   for (const t of TEAM) {
@@ -771,7 +851,7 @@ function applyTod(force) {
   renderer.toneMappingExposure = s.exp;
   for (const l of lamps) l.p.intensity = l.base * s.lamp;
   for (const g of glowMats) g.m.color.copy(g.base).multiplyScalar(1.7 * s.glow);
-  drawSky(m);
+  drawSky(m); drawBossWindows(m);
   document.querySelectorAll('#tod button').forEach((b) => b.classList.toggle('on', b.dataset.m === todMode));
 }
 document.querySelectorAll('#tod button').forEach((b) => b.addEventListener('click', () => { todMode = b.dataset.m; applyTod(true); }));
