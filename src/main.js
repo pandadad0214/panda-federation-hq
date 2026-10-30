@@ -329,7 +329,7 @@ prop('bookcaseOpen', -19.3, -9.0, Math.PI / 2); prop('lampRoundFloor', -19.2, -5
 // ---------- decor ----------
 const pl = (x, z, big) => prop(big ? 'pottedPlant' : 'plantSmall1', x, z, rand(0, 6), { s: big ? 2.6 : 2.4 });
 [[-12.6, -13.3, 1], [-3.2, -13.3, 1], [3.0, -13.3, 0], [8.7, -13.3, 1], [-13.0, 13.4, 1], [-4.0, 13.4, 0], [2.0, 13.4, 1], [12.0, 13.4, 1],
-  [19.2, 13.3, 1], [-19.6, -2.25, 1], [-19.55, -0.75, 0], [11.6, 3.4, 0]].forEach(([x, z, b]) => pl(x, z, b));
+  [19.2, 13.3, 1], [-19.7, 0.7, 1], [-19.55, -0.75, 0], [11.6, 3.4, 0]].forEach(([x, z, b]) => pl(x, z, b));
 prop('bookcaseOpen', -18.6, 3.7, 0); prop('bookcaseOpen', -17.6, 3.7, 0);
 // writers' den whiteboard + identity file cabinets
 rbox(0.6, 1.1, 0.6, '#505a6a', -12.4, 0.55, 4.0, scene, {}, 0.06); rbox(0.6, 1.1, 0.6, '#505a6a', -12.4, 0.55, 4.7, scene, {}, 0.06);
