@@ -13,7 +13,7 @@ Live 3D office for the bot team. Vite + Three.js front end, served by a Cloudfla
 - `GET  /api/state`   session cookie       bots + usage + feed health
 - `GET/POST /login`, `GET /logout`
 
-Bot ids: overlord moneybot stockbot superseller ledger shadow eraser kimchi scribe.
+Bot ids: overlord moneybot stockbot superseller ledger shadow eraser kimchi scribe planner.
 Text is cleaned, truncated to 80 chars, and rejected (422) if it looks like an email, phone number, or 6+ digit run.
 `working` and `done` read as idle after 10 min without an update; `waiting`/`error` persist until changed.
 Feed warning: shown if /api/state fails, or if the cron heartbeat (every 5 min) is 45+ min old.

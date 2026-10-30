@@ -24,16 +24,18 @@ const TEAM = [
   { id: 'eraser', name: 'Eraser', short: 'Eraser', color: '#8a8f96', dept: 'Identity Security', acc: 'eraser' },
   { id: 'kimchi', name: 'Kimchi', short: 'Kimchi', color: '#38b6c9', dept: 'Identity Security', acc: 'shield' },
   { id: 'scribe', name: 'Soulrot Scribe', short: 'Scribe', color: '#e07b2e', dept: "Writers' Den", acc: 'quill' },
+  { id: 'planner', name: 'Family Planner', short: 'Planner', color: '#a77de0', dept: 'Front Desk', acc: 'clipboard' },
 ];
 
 // desk chair spots (bot faces +z, desk in front of it)
 const DESKS = {
   overlord: [-16, -9.1], moneybot: [-9.5, -9.1], stockbot: [-5.5, -9.1], superseller: [-0.2, -9.1], ledger: [6, -9.1],
   shadow: [-16.5, 6.0], eraser: [-10.5, 6.0], kimchi: [-6.5, 6.0], scribe: [-1, 6.0],
+  planner: [-18.2, -1.6], // front desk just outside Leadership, facing into the hall
 };
 // lounge: U-shaped sofas. [x, z, facing]
 const SEATS = [[3.69, 5.3, 0], [5.11, 5.3, 0], [6.64, 5.3, 0], [8.06, 5.3, 0], [9.59, 5.3, 0], [11.01, 5.3, 0],
-  [3.3, 8.1, Math.PI / 2], [11.4, 8.1, -Math.PI / 2], [3.3, 9.5, Math.PI / 2]];
+  [3.3, 8.1, Math.PI / 2], [11.4, 7.5, -Math.PI / 2], [3.3, 9.5, Math.PI / 2], [11.4, 8.7, -Math.PI / 2]];
 const TRAY = [-14.4, -7.0];
 const KIT = 2.4; // Kenney furniture kit scale
 
@@ -209,6 +211,7 @@ const ZONES = [
   { name: 'SALES', x0: -3, x1: 3, z0: -14, z1: -3, color: '#2d5fb4', glow: '#7fb4ff' },
   { name: 'FAMILY FINANCE', x0: 3, x1: 9, z0: -14, z1: -3, color: '#1c8a86', glow: '#6ff7ea' },
   { name: 'RESEARCH', x0: 9, x1: 20, z0: -14, z1: -3, color: '#24386c', glow: '#5f8dff' },
+  { name: 'FRONT DESK', x0: -20, x1: -15.6, z0: -3, z1: 3, color: '#7d5cc4', glow: '#c9b2ff' },
   { name: 'SCHOOL', x0: -20, x1: -13, z0: 3, z1: 14, color: '#7a3f9a', glow: '#e08cff' },
   { name: 'IDENTITY SECURITY', x0: -13, x1: -4, z0: 3, z1: 14, color: '#2f4a6e', glow: '#6fd3ff' },
   { name: "WRITERS' DEN", x0: -4, x1: 2, z0: 3, z1: 14, color: '#b0532a', glow: '#ffae6b' },
@@ -326,7 +329,7 @@ prop('bookcaseOpen', -19.3, -9.0, Math.PI / 2); prop('lampRoundFloor', -19.2, -5
 // ---------- decor ----------
 const pl = (x, z, big) => prop(big ? 'pottedPlant' : 'plantSmall1', x, z, rand(0, 6), { s: big ? 2.6 : 2.4 });
 [[-12.6, -13.3, 1], [-3.2, -13.3, 1], [3.0, -13.3, 0], [8.7, -13.3, 1], [-13.0, 13.4, 1], [-4.0, 13.4, 0], [2.0, 13.4, 1], [12.0, 13.4, 1],
-  [19.2, 13.3, 1], [-19.4, 2.2, 1], [-19.4, -2.3, 0], [11.6, 3.4, 0]].forEach(([x, z, b]) => pl(x, z, b));
+  [19.2, 13.3, 1], [-19.6, -2.25, 1], [-19.55, -0.75, 0], [11.6, 3.4, 0]].forEach(([x, z, b]) => pl(x, z, b));
 prop('bookcaseOpen', -18.6, 3.7, 0); prop('bookcaseOpen', -17.6, 3.7, 0);
 // writers' den whiteboard + identity file cabinets
 rbox(0.6, 1.1, 0.6, '#505a6a', -12.4, 0.55, 4.0, scene, {}, 0.06); rbox(0.6, 1.1, 0.6, '#505a6a', -12.4, 0.55, 4.7, scene, {}, 0.06);
@@ -343,6 +346,43 @@ function crest(url, x, y, s) {
 }
 crest('/crest-main.jpg', -16, 2.3, 1.5);
 rbox(1.82, 1.82, 0.04, '#e8b93a', -16, 2.3, -13.985, scene, { roughness: 0.4, metalness: 0.3 }, 0.03); // gold trim behind the main crest
+
+// ---------- Family Planner front desk: backdrop with a real wall calendar and an outings map ----------
+rbox(3.2, 1.75, 0.12, '#e9e3f5', -18.3, 0.875, -2.72, scene, { roughness: 0.95 }, 0.04); // low lavender divider in front of the glass
+box(3.3, 0.06, 0.16, '#7d5cc4', -18.3, 1.78, -2.72);
+const calTex = canvasTex(512, 560, () => {});
+let calDay = '';
+function drawCalendar() { // current Arizona month, today ringed; no events are invented
+  const now = new Date(), key = fmtAZ(now, { year: 'numeric', month: 'numeric', day: 'numeric' }); if (key === calDay) return; calDay = key;
+  const [mo, dd, yy] = key.split('/').map(Number);
+  const { g, c } = calTex.userData, w = c.width, h = c.height;
+  g.fillStyle = '#fbfaf7'; g.fillRect(0, 0, w, h); g.fillStyle = '#a77de0'; g.fillRect(0, 0, w, 120);
+  g.fillStyle = '#fff'; g.font = `800 64px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText(fmtAZ(now, { month: 'long' }).toUpperCase() + ' ' + yy, w / 2, 64);
+  const first = new Date(Date.UTC(yy, mo - 1, 1)).getUTCDay(), days = new Date(Date.UTC(yy, mo, 0)).getUTCDate();
+  const cw = (w - 40) / 7, ch = (h - 190) / 6;
+  g.font = `700 30px ${FONT}`; g.fillStyle = '#8a7fa6'; 'SMTWTFS'.split('').forEach((d, i) => g.fillText(d, 20 + cw * (i + 0.5), 152));
+  for (let d = 1; d <= days; d++) { const k = first + d - 1, cx = 20 + cw * (k % 7 + 0.5), cy = 190 + ch * (Math.floor(k / 7) + 0.5);
+    if (d === dd) { g.fillStyle = '#a77de0'; g.beginPath(); g.arc(cx, cy, 30, 0, 7); g.fill(); g.fillStyle = '#fff'; } else g.fillStyle = '#3b3550';
+    g.font = `700 34px ${FONT}`; g.fillText(String(d), cx, cy); }
+  calTex.needsUpdate = true;
+}
+drawCalendar(); setInterval(drawCalendar, 10 * 60000);
+{ const cal = new THREE.Mesh(new THREE.PlaneGeometry(0.82, 0.9), new THREE.MeshBasicMaterial({ map: calTex, color: new THREE.Color(1.05, 1.05, 1.05) }));
+  cal.position.set(-19.25, 1.15, -2.64); scene.add(cal); rbox(0.88, 0.96, 0.02, '#3b3550', -19.25, 1.15, -2.655, scene, {}, 0.01);
+  // cork map: a stylized local map with pins on the towns Sean named (decor only, not status data)
+  const mapTex = canvasTex(768, 512, (g, w, h) => {
+    g.fillStyle = '#c99a63'; g.fillRect(0, 0, w, h); g.fillStyle = '#efe6cf'; g.fillRect(26, 26, w - 52, h - 52);
+    g.fillStyle = '#d9c99c'; g.beginPath(); g.moveTo(26, 330); g.bezierCurveTo(200, 260, 330, 420, 520, 300); g.lineTo(w - 26, 360); g.lineTo(w - 26, h - 26); g.lineTo(26, h - 26); g.fill();
+    g.strokeStyle = '#6fb3e0'; g.lineWidth = 14; g.beginPath(); g.moveTo(120, 26); g.bezierCurveTo(90, 180, 150, 320, 110, h - 26); g.stroke(); // river
+    g.strokeStyle = '#b9a98a'; g.lineWidth = 8; g.beginPath(); g.moveTo(110, 300); g.lineTo(450, 210); g.lineTo(w - 26, 150); g.stroke(); g.beginPath(); g.moveTo(450, 210); g.lineTo(560, h - 26); g.stroke();
+    const pin = (x, y, col, label) => { g.fillStyle = 'rgba(0,0,0,.25)'; g.beginPath(); g.arc(x + 4, y + 6, 15, 0, 7); g.fill(); g.fillStyle = col; g.beginPath(); g.arc(x, y, 15, 0, 7); g.fill();
+      g.fillStyle = '#fff'; g.beginPath(); g.arc(x - 4, y - 4, 4, 0, 7); g.fill(); g.fillStyle = '#3b3550'; g.font = `700 30px ${FONT}`; g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText(label, x + 24, y); };
+    pin(450, 210, '#e0533d', 'Kingman'); pin(330, 300, '#a77de0', 'Golden Valley'); pin(130, 160, '#3a8fd9', 'Bullhead');
+  });
+  const map = new THREE.Mesh(new THREE.PlaneGeometry(1.35, 0.9), new THREE.MeshStandardMaterial({ map: mapTex, roughness: 0.9, metalness: 0 }));
+  map.position.set(-17.75, 1.15, -2.645); scene.add(map);
+}
 
 // ---------- Overlord office glow-up ----------
 { // round red rug with a gold rim under the boss desk (clear of the LEADERSHIP lettering at the back)
@@ -540,6 +580,8 @@ function accessory(kind) {
     case 'book': rbox(0.24, 0.31, 0.07, '#1c6b5f', 0, 0, 0, g, {}, 0.015); box(0.21, 0.29, 0.072, '#f0ead9', 0.016, 0, 0, g); break;
     case 'eraser': rbox(0.17, 0.44, 0.13, '#f08aa0', 0, 0, 0, g, {}, 0.03); rbox(0.175, 0.09, 0.135, '#3e6fc4', 0, -0.13, 0, g, {}, 0.01); break;
     case 'shield': { const s = cyl(0.22, 0.22, 0.05, '#1e8fa3', 0, 0, 0, g, 28); s.rotation.x = Math.PI / 2; const e = cyl(0.1, 0.1, 0.055, '#e8f6f8', 0, 0, 0.005, g, 20); e.rotation.x = Math.PI / 2; break; }
+    case 'clipboard': rbox(0.24, 0.32, 0.03, '#8a5a36', 0, 0, 0, g, {}, 0.015); box(0.2, 0.25, 0.032, '#f6f2ea', 0, -0.015, 0, g);
+      rbox(0.1, 0.045, 0.045, '#c9ced6', 0, 0.15, 0.01, g, {}, 0.01); for (let i = 0; i < 4; i++) box(0.13, 0.012, 0.034, '#a77de0', -0.01, 0.06 - i * 0.05, 0, g); break;
     case 'quill': { const f = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.48, 12), mat('#f4efe4')); f.position.y = 0.14; f.rotation.z = 0.25; f.castShadow = true; g.add(f);
       box(0.018, 0.14, 0.018, '#2b2b2e', 0.035, -0.14, 0, g); break; }
   }
@@ -636,10 +678,10 @@ function routeTo(b, dest) {
   const exitLounge = () => { const [fx, fz] = seatFront(b); const pts = [[fx, fz]]; if (fz < 6.8) pts.push([fx, 6.8], [fx < 7.35 ? 4.7 : 10.0, 6.8]); const ex = pts[pts.length - 1][0];
     pts.push([ex, 10.9], [2.0, 10.9], [2.0, lz]); return pts; };
   const exit = { lounge: exitLounge,
-    desk: () => { const [dx, dz] = b.desk; if (b.def.id === 'overlord') return [[-14.0, dz], [-13.9, -3], [-13.9, lz]]; return dz < 0 ? [[dx + 1.25, dz], [dx + 1.25, lz]] : [[dx, lz]]; },
+    desk: () => { const [dx, dz] = b.desk; if (b.def.id === 'overlord') return [[-14.0, dz], [-13.9, -3], [-13.9, lz]]; if (b.def.id === 'planner') return [[-16.6, dz], [-16.6, lz]]; return dz < 0 ? [[dx + 1.25, dz], [dx + 1.25, lz]] : [[dx, lz]]; },
     tray: () => [[-13.9, -5.5], [-13.9, -3], [-13.9, lz]] };
   const enter = { lounge: () => exitLounge().reverse().concat([[b.seat[0], b.seat[1]]]),
-    desk: () => { const [dx, dz] = b.desk; if (b.def.id === 'overlord') return [[-13.9, lz], [-13.9, -3], [-14.0, dz], [dx, dz]]; return dz < 0 ? [[dx + 1.25, lz], [dx + 1.25, dz], [dx, dz]] : [[dx, lz], [dx, dz]]; },
+    desk: () => { const [dx, dz] = b.desk; if (b.def.id === 'overlord') return [[-13.9, lz], [-13.9, -3], [-14.0, dz], [dx, dz]]; if (b.def.id === 'planner') return [[-16.6, lz], [-16.6, dz], [dx, dz]]; return dz < 0 ? [[dx + 1.25, lz], [dx + 1.25, dz], [dx, dz]] : [[dx, lz], [dx, dz]]; },
     tray: () => [[-13.9, lz], [-13.9, -3], [-13.9, -5.5], [TRAY[0], TRAY[1] + 0.85]] };
   out.push(...exit[b.loc](), ...enter[dest]());
   return out.map(([x, z]) => V(x, z));

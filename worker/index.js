@@ -2,7 +2,7 @@
 // Auth: /login sets an HttpOnly HMAC-signed session cookie. Everything else needs it,
 // except bot push endpoints which use the STATUS_TOKEN bearer.
 
-const BOTS = ['overlord', 'moneybot', 'stockbot', 'superseller', 'ledger', 'shadow', 'eraser', 'kimchi', 'scribe'];
+const BOTS = ['overlord', 'moneybot', 'stockbot', 'superseller', 'ledger', 'shadow', 'eraser', 'kimchi', 'scribe', 'planner'];
 const STATES = ['working', 'waiting', 'error', 'done', 'idle'];
 const STALE_MS = 10 * 60 * 1000;          // working/done -> idle after 10 min with no update
 const QUIET_WARN_MS = 45 * 60 * 1000;     // feed "quiet" warning threshold

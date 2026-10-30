@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Push a bot status to Panda Federation H.Q.
 # Usage: status.sh <bot> <working|waiting|error|done|idle> "<short generic text, <=80 chars>"
-# Bots: overlord moneybot stockbot superseller ledger shadow eraser kimchi scribe
+# Bots: overlord moneybot stockbot superseller ledger shadow eraser kimchi scribe planner
 # Never fails the caller: always exits 0, prints one short line.
 BOT="${1:-}"; STATE="${2:-}"; TEXT="${3:-}"
 DIR="${OFFICE3D_HOME:-/home/box/.office3d}"
