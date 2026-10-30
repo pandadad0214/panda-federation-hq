@@ -10,12 +10,18 @@
 <body>
 <div id="app"></div>
 <header id="hud">
-  <div class="title">Panda Federation H.Q.</div>
+  <div class="title">🐼 Panda Federation H.Q.</div>
   <div id="feed" class="feed"><span class="dot"></span><span id="feedtext">connecting…</span></div>
+  <div id="simlabel" hidden>Simulation</div>
 </header>
-<div id="simlabel" hidden>Simulation</div>
 <div id="warn" hidden></div>
+<aside id="panel">
+  <section><h2>Team <span class="n">9</span></h2><ul id="team"></ul></section>
+  <section id="actsec" hidden><h2 id="actlabel">Activity</h2><ul id="activity"></ul></section>
+</aside>
 <footer id="bar">
+  <div id="legend"><span><i class="working"></i>Working</span><span><i class="waiting"></i>Needs you</span><span><i class="error"></i>Error</span><span><i class="done"></i>Done</span><span><i class="idle"></i>Idle</span></div>
+  <div id="tod"><button data-m="now" type="button">Now</button><button data-m="day" type="button">Day</button><button data-m="evening" type="button">Evening</button><button data-m="night" type="button">Night</button></div>
   <button id="simbtn" type="button">Simulate Work</button>
   <a id="logout" href="/logout">Sign out</a>
 </footer>
