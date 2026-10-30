@@ -273,7 +273,7 @@ function workstation(id, x, z) { // chair at (x,z) facing +z, desk in front
   prop('desk', x, dz, Math.PI);
   const mon = prop('computerScreen', x, dz + 0.12, Math.PI, { y: 0.91 });
   prop('computerKeyboard', x, dz - 0.18, Math.PI, { y: 0.91 });
-  prop('chairDesk', x, z - 0.1, Math.PI, { shadow: true });
+  prop('chairDesk', x, z - 0.1, 0, { shadow: true }); // Kenney chairs face +z: seat toward the desk, backrest behind the bot
   // monitor glow surface (faces the bot, -z)
   const scr = new THREE.Mesh(new THREE.PlaneGeometry(0.78, 0.46), new THREE.MeshBasicMaterial({ color: '#2a3a4c' }));
   scr.position.set(x, 1.3, dz + 0.12 - 0.08); scr.rotation.y = Math.PI; scene.add(scr);
@@ -310,9 +310,9 @@ crest('/crest-samurai.jpg', 6, 2.3, 1.3);
 
 // lounge
 const SOFA = '#1f9e9a';
-for (const x of [4.4, 7.35, 10.3]) prop('loungeSofa', x, 5.0, Math.PI, { s: 2.9, recolor: { carpet: SOFA } });
-prop('loungeSofa', 3.0, 8.8, -Math.PI / 2, { s: 2.9, recolor: { carpet: SOFA } });
-prop('loungeSofa', 11.7, 8.1, Math.PI / 2, { s: 2.4, recolor: { carpet: SOFA } });
+for (const x of [4.4, 7.35, 10.3]) prop('loungeSofa', x, 5.0, 0, { s: 2.9, recolor: { carpet: SOFA } });
+prop('loungeSofa', 3.0, 8.8, Math.PI / 2, { s: 2.9, recolor: { carpet: SOFA } });
+prop('loungeSofa', 11.7, 8.1, -Math.PI / 2, { s: 2.4, recolor: { carpet: SOFA } });
 prop('tableCoffee', 7.35, 8.0, 0, { s: 2.6 });
 // wall TV in the lounge (shows the Arizona clock, which is real)
 const tvTex = canvasTex(1024, 576, () => {});
@@ -409,20 +409,22 @@ function fmtAZ(d, opts) { return new Intl.DateTimeFormat('en-US', { timeZone: AZ
 function drawUsage(u) {
   const { g, c } = usageTex.userData, w = c.width, h = c.height;
   g.fillStyle = '#0f1520'; g.fillRect(0, 0, w, h);
-  g.fillStyle = '#9fb0c6'; g.font = `700 104px ${FONT}`; g.textAlign = 'center'; g.fillText('WEEKLY USAGE LEFT', w / 2, 150);
+  g.fillStyle = '#9fb0c6'; g.font = `700 104px ${FONT}`; g.textAlign = 'center'; g.fillText('WEEKLY USAGE', w / 2, 150);
   if (!u) {
     g.fillStyle = '#d7dde2'; g.font = `700 210px ${FONT}`; g.fillText('no reading yet', w / 2, 540);
     g.fillStyle = '#8b949d'; g.font = `500 84px ${FONT}`; g.fillText('waiting for the first usage check', w / 2, 730);
   } else {
-    const left = Math.max(0, 100 - u.percentUsed);
-    const col = left > 40 ? '#5ff0a0' : left > 15 ? '#ffd166' : '#ff7b6e';
-    g.fillStyle = col; g.font = `800 330px ${FONT}`; g.fillText(`${left.toFixed(left % 1 ? 1 : 0)}%`, w / 2, 480);
-    g.fillStyle = '#26303d'; g.fillRect(260, 545, w - 520, 54);
-    g.fillStyle = col; g.fillRect(260, 545, (w - 520) * Math.min(1, left / 100), 54);
-    g.fillStyle = '#d7dde2'; g.font = `600 92px ${FONT}`;
-    g.fillText(`Resets ${fmtAZ(new Date(u.resetsAt), { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} AZ`, w / 2, 750);
-    g.fillStyle = '#8b949d'; g.font = `500 66px ${FONT}`;
-    g.fillText(`reading taken ${fmtAZ(new Date(u.recordedAt), { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} AZ`, w / 2, 880);
+    const used = Math.min(100, Math.max(0, u.percentUsed)), left = 100 - used;
+    const f1 = (n) => n.toFixed(n % 1 ? 1 : 0);
+    const fit = (t, wt, px, y) => { g.font = `${wt} ${px}px ${FONT}`; const m = g.measureText(t).width, max = w - 160; if (m > max) g.font = `${wt} ${Math.floor(px * max / m)}px ${FONT}`; g.fillText(t, w / 2, y); };
+    const col = used < 60 ? '#5ff0a0' : used < 85 ? '#ffd166' : '#ff7b6e';
+    g.fillStyle = col; fit(`${f1(used)}% used`, 800, 270, 440);
+    g.fillStyle = '#26303d'; g.fillRect(260, 505, w - 520, 54);
+    g.fillStyle = col; g.fillRect(260, 505, (w - 520) * used / 100, 54);
+    g.fillStyle = '#d7dde2';
+    fit(`${f1(Math.round(left * 10) / 10)}% left · resets ${fmtAZ(new Date(u.resetsAt), { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} AZ`, 600, 76, 690);
+    g.fillStyle = '#8b949d';
+    fit(`as of ${fmtAZ(new Date(u.recordedAt), { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} AZ (last check, not live)`, 500, 66, 840);
   }
   usageTex.needsUpdate = true;
 }
