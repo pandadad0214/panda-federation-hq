@@ -25,9 +25,17 @@ so only screens/rug edges/lamps glow), SMAA. Now/Day/Evening/Night toggle (Now =
 If frames are slow, effects drop in order AO → bloom → shadows; pixel ratio is never lowered.
 URL flags: `?simulate=1`, `?tod=day|evening|night`, `?hq=1` (lock effects on, used for screenshots), `?ao=0`, `?bloom=0`.
 
+## Look (v3)
+The office sits mid-way up a glass tower: facade with floors below (lit windows show glimpses of other offices, decor only),
+a few low-poly towers in the distance, framed-glass partitions with doorways around every department, and a gym corner by the windows.
+Each bot's chibi is restyled after its profile picture (per-part vertex colors + small low-poly add-ons: horns, hair, ears, hood…).
+Seated poses sit on the cushion (`SEAT_FIT` in main.js). `window.__hq.project/camera/place` exist for the screenshot scripts only.
+
 ## Scripts
 - `scripts/status.sh <bot> <state> "<text>"` — always exits 0; token from /home/box/.office3d/status_token, URL from /home/box/.office3d/url (falls back to localhost).
 - `scripts/usage.sh <percentUsed> <resetsAtISO>`
 - `scripts/deploy.sh` — needs CLOUDFLARE_API_TOKEN + SITE_PASSWORD in env.
 - `SHOT_PASSWORD=… node scripts/shots.mjs <url> local|live` — Playwright screenshots into shots/.
 - `SHOT_PASSWORD=… node scripts/shots-v2.mjs [url]` — v2 screenshots into shots/v2/.
+- `SHOT_PASSWORD=… node scripts/shots-v3.mjs <url> <tag>` — overview + zoomed views into shots/v3/<tag>-*.png.
+- `SHOT_PASSWORD=… node scripts/shots-chars.mjs <url> <tag>` — character line-up close-ups; `shots-look.mjs` for any zoomed view.
