@@ -14,7 +14,7 @@ for (const v of VIEWS) {
   if (page.url().includes('/login')) { await page.fill('input[name=password]', process.env.SHOT_PASSWORD); await Promise.all([page.waitForNavigation(), page.click('button[type=submit]')]); await page.goto(BASE + q, { waitUntil: 'networkidle' }); }
   await page.waitForFunction(() => window.__hq && document.querySelector('#feedtext').textContent !== 'connecting…', null, { timeout: 90000 });
   await page.waitForTimeout(2500);
-  await page.evaluate(([x, y, z, zoom, deskAll]) => { const H = window.__hq, c = H.camera; H.controls.maxZoom = 30;
+  await page.evaluate(([x, y, z, zoom, deskAll]) => { const H = window.__hq, c = H.camera; H.controls.maxZoom = 30; H.controls.minZoom = 0.3;
     if (deskAll === '1') H.bots.forEach((b) => { b.want = 'working'; H.place(b, 'desk'); });
     c.zoom = zoom; c.updateProjectionMatrix(); H.controls.update(); c.updateMatrixWorld();
     const [px, py] = H.project(x, y, z); const upp = (c.right - c.left) / c.zoom / innerWidth;

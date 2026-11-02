@@ -18,13 +18,13 @@ const TEAM = [ // colors + looks follow each bot's own profile picture
   { id: 'overlord', name: 'Overlord Boss', short: 'Overlord', color: '#6a3c9c', dept: 'Leadership', acc: 'club' },
   { id: 'moneybot', name: 'Moneybot', short: 'Moneybot', color: '#2fbf4a', dept: 'Money Lab', acc: 'coin' },
   { id: 'stockbot', name: 'Stockbot', short: 'Stockbot', color: '#d6dbe2', dept: 'Money Lab', acc: 'tablet' },
-  { id: 'superseller', name: 'Superseller Mini', short: 'Superseller', color: '#3a6fc4', dept: 'Sales', acc: 'box' },
+  { id: 'superseller', name: 'eBay Superbot', short: 'eBay Superbot', color: '#3a6fc4', dept: 'Sales', acc: 'box' },
   { id: 'ledger', name: 'Family Ledger', short: 'Ledger', color: '#2f7a5a', dept: 'Family Finance', acc: 'book' },
-  { id: 'shadow', name: 'Gatewalkers Shadow', short: 'Shadow', color: '#3f6fd0', dept: 'School', acc: 'backpack' },
-  { id: 'eraser', name: 'Eraser', short: 'Eraser', color: '#cfe3ff', dept: 'Identity Security', acc: 'eraser' },
+  { id: 'shadow', name: 'Schoolbot', short: 'Schoolbot', color: '#3f6fd0', dept: 'School', acc: 'backpack' },
+  { id: 'eraser', name: 'Cloudy - Erase Identity', short: 'Cloudy', color: '#cfe3ff', dept: 'Identity Security', acc: 'eraser' },
   { id: 'kimchi', name: 'Kimchi', short: 'Kimchi', color: '#a08a3a', dept: 'Identity Security', acc: 'none' },
-  { id: 'scribe', name: 'Soulrot Scribe', short: 'Scribe', color: '#d9a640', dept: "Writers' Den", acc: 'portal' },
-  { id: 'planner', name: 'Family Planner', short: 'Planner', color: '#c2346b', dept: 'Front Desk', acc: 'planner' },
+  { id: 'scribe', name: 'Gatewalkers Guide', short: 'Gatewalkers', color: '#d9a640', dept: "Writers' Den", acc: 'portal' },
+  { id: 'planner', name: 'SecretaryBot', short: 'SecretaryBot', color: '#c2346b', dept: 'Front Desk', acc: 'planner' },
 ];
 // per-bot outfit: vertex colors by body part (head, torso, chest front, arms, hands, legs) + eye style
 const LOOKS = {
@@ -77,7 +77,7 @@ const camera = new THREE.OrthographicCamera(-10, 10, 10, -10, 0.1, 400);
 const ISO_DIR = new THREE.Vector3(-Math.sin(Math.PI / 4), Math.tan(THREE.MathUtils.degToRad(35)), Math.cos(Math.PI / 4)).normalize();
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableRotate = false; controls.enableDamping = true; controls.dampingFactor = 0.15;
-controls.screenSpacePanning = true; controls.minZoom = 1; controls.maxZoom = 4;
+controls.screenSpacePanning = true; controls.minZoom = 0.6; controls.maxZoom = 4;
 controls.mouseButtons = { LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.PAN };
 controls.touches = { ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_PAN };
 
@@ -221,7 +221,7 @@ box(0.12, 0.06, D, FRAME, 20.1, 1.0, 0);
 // ---------- the tower: we're mid-way up a skyscraper (facade + floors below, distant skyline) ----------
 // decor only: the lit windows are other floors of the building, not status data
 let seed = 7; const srand = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
-const FLOOR_H = 4.3, FLOORS = 12, TOWER_H = FLOOR_H * FLOORS;
+const FLOOR_H = 4.3, FLOORS = 12, TOWER_H = FLOOR_H * FLOORS, GROUND_Y = -0.7 - TOWER_H;
 function facadeTex(widthW, cols) {
   const PXW = 40, w = Math.round(widthW * PXW), h = Math.round(TOWER_H * PXW);
   const base = canvasTex(w, h, () => {}), glow = canvasTex(w, h, () => {});
@@ -251,7 +251,7 @@ function facadeTex(widthW, cols) {
     }
     g.fillStyle = '#394356'; g.fillRect(0, f * fh, w, band); g.fillStyle = 'rgba(255,255,255,.06)'; g.fillRect(0, f * fh, w, 3);
   }
-  for (const c of [g, e]) { const fade = c.createLinearGradient(0, h * 0.35, 0, h); fade.addColorStop(0, 'rgba(7,11,22,0)'); fade.addColorStop(1, 'rgba(7,11,22,1)'); c.fillStyle = fade; c.fillRect(0, 0, w, h); }
+  for (const c of [g, e]) { const fade = c.createLinearGradient(0, h * 0.35, 0, h); fade.addColorStop(0, 'rgba(12,18,30,0)'); fade.addColorStop(1, 'rgba(12,18,30,.55)'); c.fillStyle = fade; c.fillRect(0, 0, w, h); }
   base.needsUpdate = glow.needsUpdate = true; glow.colorSpace = THREE.SRGBColorSpace;
   return new THREE.MeshStandardMaterial({ map: base, emissiveMap: glow, emissive: '#ffffff', emissiveIntensity: 1, roughness: 0.5, metalness: 0.1 });
 }
@@ -264,15 +264,64 @@ const skyWin = canvasTex(256, 512, (g, w, h) => { g.fillStyle = '#000'; g.fillRe
   for (let y = 6; y < h; y += 16) for (let x = 6; x < w; x += 14) if (srand() < 0.14) { g.fillStyle = srand() < 0.8 ? '#ffd48a' : '#bfe0ff'; g.fillRect(x, y, 6, 8); } });
 skyWin.wrapS = skyWin.wrapT = THREE.RepeatWrapping;
 const skyline = [];
-for (const [x, z, w, d, top] of [[-34, -40, 5, 5, 6], [-16, -52, 6, 5, 14], [4, -46, 4, 6, 3], [16, -58, 7, 7, 20], [32, -44, 5, 5, 9], [46, -26, 6, 7, 16],
-  [54, -2, 5, 5, 4], [50, 18, 7, 6, 12], [62, 36, 6, 6, 18], [-28, -70, 8, 6, 22], [30, -80, 7, 7, 26], [72, -40, 8, 8, 24]]) {
-  const hgt = top + 70; const g = new THREE.BoxGeometry(w, hgt, d);
+for (let [x, z, w, d, top] of [[-34, -40, 5, 5, 6], [4, -46, 4, 6, 3], [32, -44, 5, 5, 9], [46, -26, 6, 7, 16],
+  [54, -2, 5, 5, 4], [50, 18, 7, 6, 12], [62, 36, 6, 6, 18], [-28, -62, 8, 6, 22], [20, -66, 7, 7, 14], [-46, -14, 6, 6, 10]]) {
+  top = top * 0.6 - 6; const hgt = top - GROUND_Y; const g = new THREE.BoxGeometry(w, hgt, d);
   const m = new THREE.MeshStandardMaterial({ color: '#1c2638', emissiveMap: skyWin, emissive: '#ffffff', emissiveIntensity: 0.8, roughness: 0.8, metalness: 0 });
   m.emissiveMap = skyWin.clone(); m.emissiveMap.repeat.set(w / 12, hgt / 24); m.emissiveMap.needsUpdate = true;
-  const t = new THREE.Mesh(g, m); t.position.set(x, top - hgt / 2, z); scene.add(t); skyline.push(m);
+  const t = new THREE.Mesh(g, m); t.position.set(x, GROUND_Y + hgt / 2, z); scene.add(t); skyline.push(m);
   if (srand() < 0.6) { const ant = new THREE.Mesh(new THREE.BoxGeometry(0.4, 4, 0.4), mat('#2a3346')); ant.position.set(x, top + 2, z); scene.add(ant);
     const bl = new THREE.Mesh(new THREE.SphereGeometry(0.45, 8, 6), new THREE.MeshBasicMaterial({ color: new THREE.Color(3, 0.4, 0.3) })); bl.position.set(x, top + 4.2, z); scene.add(bl); }
 }
+
+// ---------- city ground + sky backdrop (aligned to the fixed iso view: local +x = away from the camera, +z = screen right) ----------
+const cityG = new THREE.Group(); cityG.rotation.y = Math.PI / 4; cityG.position.y = GROUND_Y; scene.add(cityG);
+const G_NEAR = -90, G_FAR = 72, G_SIDE = 260;
+const groundTex = canvasTex(1024, 2048, () => {}), groundGlow = canvasTex(1024, 2048, () => {});
+{ const g = groundTex.userData.g, e = groundGlow.userData.g, w = 1024, h = 2048; // u along away-distance, v along screen-right
+  g.fillStyle = '#3a3f48'; g.fillRect(0, 0, w, h); e.fillStyle = '#000'; e.fillRect(0, 0, w, h);
+  const bs = 46, st = 10;
+  for (let x = 0; x < w; x += bs) for (let y = 0; y < h; y += bs) {
+    const k = srand(); g.fillStyle = k < 0.12 ? '#4f7d4a' : k < 0.2 ? '#6b7280' : ['#59606b', '#646a74', '#525862', '#6d6a64'][Math.floor(srand() * 4)];
+    g.fillRect(x + st / 2, y + st / 2, bs - st, bs - st);
+    if (k < 0.12) { g.fillStyle = '#3f6a3c'; for (let t = 0; t < 4; t++) { g.beginPath(); g.arc(x + 12 + srand() * 22, y + 12 + srand() * 22, 4, 0, 7); g.fill(); } }
+  }
+  g.fillStyle = 'rgba(230,230,210,.35)'; for (let x = 0; x < w; x += bs) for (let y = 0; y < h; y += 8) g.fillRect(x - 1, y, 2, 4); // lane marks
+  for (let x = 0; x < w; x += bs) for (let y = 0; y < h; y += bs) { // street lights + traffic
+    e.fillStyle = '#ffcf7a'; e.fillRect(x - 2, y - 2, 4, 4); if (srand() < 0.35) { e.fillStyle = srand() < 0.5 ? '#ff5a4a' : '#fff1c9'; e.fillRect(x - 1, y + 8 + srand() * 26, 3, 5); } }
+  groundTex.needsUpdate = groundGlow.needsUpdate = true; }
+const groundMat = new THREE.MeshStandardMaterial({ map: groundTex, emissiveMap: groundGlow, emissive: '#ffffff', emissiveIntensity: 0.2, roughness: 1, metalness: 0 });
+{ const gp = new THREE.Mesh(new THREE.PlaneGeometry(G_FAR - G_NEAR, G_SIDE * 2), groundMat); gp.rotation.x = -Math.PI / 2; gp.position.x = (G_FAR + G_NEAR) / 2; cityG.add(gp);
+  // rotate the texture so its long side runs along screen-right
+  groundTex.center.set(0.5, 0.5); groundTex.rotation = Math.PI / 2; groundGlow.center.set(0.5, 0.5); groundGlow.rotation = Math.PI / 2; }
+// low-rise blocks: one instanced draw call
+{ const N = 260, geo = new THREE.BoxGeometry(1, 1, 1); geo.translate(0, 0.5, 0);
+  const bm = new THREE.MeshStandardMaterial({ color: '#ffffff', emissiveMap: skyWin, emissive: '#ffffff', emissiveIntensity: 0.6, roughness: 0.9, metalness: 0 });
+  const im = new THREE.InstancedMesh(geo, bm, N); const M4 = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), ps = new THREE.Vector3(), col = new THREE.Color(), wp = new THREE.Vector3();
+  let n = 0;
+  for (let tries = 0; n < N && tries < 4000; tries++) {
+    const lx = G_NEAR + 20 + srand() * (G_FAR - G_NEAR - 26), lz = (srand() * 2 - 1) * (G_SIDE - 10);
+    wp.set(lx, 0, lz).applyAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI / 4);
+    if (Math.abs(wp.x) < 27 && Math.abs(wp.z) < 21) continue; // keep clear of our tower
+    const w = 3 + srand() * 5, d = 3 + srand() * 5, hh = 2 + Math.pow(srand(), 2) * 16;
+    M4.compose(ps.set(lx, 0, lz), q, sc.set(w, hh, d)); im.setMatrixAt(n, M4);
+    im.setColorAt(n, col.set(['#6d7684', '#7c8592', '#5f6876', '#8a8478', '#707a88'][Math.floor(srand() * 5)])); n++;
+  }
+  im.count = n; im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true; cityG.add(im); skyline.push(bm); }
+// sky backdrop: a tall world-space panel at the far edge of the ground, so the horizon meets the haze
+const skyBackTex = canvasTex(256, 1024, () => {});
+const SKY_BACK = { day: ['#3f7fcf', '#8fbde6', '#c9dff0'], evening: ['#23245a', '#8a4f7a', '#f0a070'], night: ['#03060f', '#0b1230', '#1c2647'] };
+function drawSkyBack(mode) {
+  const { g, c } = skyBackTex.userData, w = c.width, h = c.height, [top, mid, hor] = SKY_BACK[mode];
+  const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, top); gr.addColorStop(0.45, mid); gr.addColorStop(0.9, hor); gr.addColorStop(1, hor); g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  if (mode === 'night') { g.fillStyle = 'rgba(255,255,255,.8)'; for (let i = 0; i < 90; i++) g.fillRect((i * 137) % w, (i * 389) % (h * 0.6), 2, 2); }
+  if (mode === 'day') { g.fillStyle = 'rgba(255,255,255,.55)'; for (const [cx, cy] of [[60, 380], [190, 300], [120, 520], [30, 640]]) for (let k = 0; k < 3; k++) { g.beginPath(); g.ellipse(cx + k * 22, cy - (k % 2) * 8, 34, 12, 0, 0, 7); g.fill(); } }
+  skyBackTex.needsUpdate = true;
+}
+const SKY_H = 40; // the default framing sees roughly the lowest 10-25 units of this panel; above it the background is the top sky color
+const skyBack = new THREE.Mesh(new THREE.PlaneGeometry(G_SIDE * 2, SKY_H), new THREE.MeshBasicMaterial({ map: skyBackTex, fog: false }));
+skyBack.rotation.y = -Math.PI / 2; skyBack.position.set(G_FAR, SKY_H / 2, 0); cityG.add(skyBack);
+scene.fog = new THREE.Fog('#c9dff0', 165, 215);
 
 // ---------- department rugs with glowing edges + lettering ----------
 const ZONES = [
@@ -441,7 +490,7 @@ function crest(url, x, y, s) {
 crest('/crest-main.jpg', -16, 2.3, 1.5);
 rbox(1.82, 1.82, 0.04, '#e8b93a', -16, 2.3, -13.985, scene, { roughness: 0.4, metalness: 0.3 }, 0.03); // gold trim behind the main crest
 
-// ---------- Family Planner front desk: backdrop with a real wall calendar and an outings map ----------
+// ---------- SecretaryBot's front desk: backdrop with a real wall calendar and an outings map ----------
 rbox(3.2, 1.75, 0.12, '#e9e3f5', -18.3, 0.875, -2.72, scene, { roughness: 0.95 }, 0.04); // low lavender divider in front of the glass
 box(3.3, 0.06, 0.16, '#7d5cc4', -18.3, 1.78, -2.72);
 const calTex = canvasTex(512, 560, () => {});
@@ -753,7 +802,7 @@ function paintBody(mesh, look) {
   g.setAttribute('color', new THREE.BufferAttribute(col, 3));
   mesh.material = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, metalness: 0 });
 }
-// flag texture for Superseller's open-shirt reveal
+// flag texture for eBay Superbot's open-shirt reveal
 const flagTex = canvasTex(256, 168, (g, w, h) => { for (let i = 0; i < 7; i++) { g.fillStyle = i % 2 ? '#f4f4f4' : '#c8262e'; g.fillRect(0, i * h / 7, w, h / 7 + 1); }
   g.fillStyle = '#23407e'; g.fillRect(0, 0, w * 0.45, h * 4 / 7); g.fillStyle = '#fff'; for (let r = 0; r < 4; r++) for (let k = 0; k < 5; k++) g.fillRect(8 + k * 21 + (r % 2) * 10, 8 + r * 22, 6, 6); });
 const coinTex = canvasTex(128, 128, (g, w) => { g.fillStyle = '#e8b93a'; g.beginPath(); g.arc(w / 2, w / 2, w / 2 - 2, 0, 7); g.fill(); g.strokeStyle = '#a87a1c'; g.lineWidth = 8; g.stroke();
@@ -1135,9 +1184,11 @@ function applyTod(force) {
   for (const l of lamps) l.p.intensity = l.base * s.lamp;
   for (const g of glowMats) g.m.color.copy(g.base).multiplyScalar(1.7 * s.glow);
   drawSky(m); drawBossWindows(m);
-  const fz = { day: ['#b4c6dc', 0.45, '#1e2a40', 0.15], evening: ['#8a86a8', 0.95, '#1a1e36', 0.5], night: ['#5a6478', 1.15, '#0f1522', 0.7] }[m];
+  const fz = { day: ['#b4c6dc', 0.45, '#7d8fa6', 0.1], evening: ['#8a86a8', 0.95, '#1a1e36', 0.5], night: ['#5a6478', 1.15, '#0f1522', 0.7] }[m];
   for (const f of [facadeX, facadeZ]) { f.color.set(fz[0]); f.emissiveIntensity = fz[1]; }
   for (const k of skyline) { k.color.set(fz[2]); k.emissiveIntensity = fz[3]; }
+  drawSkyBack(m); const hor = SKY_BACK[m][2]; scene.fog.color.set(hor); BG.set(SKY_BACK[m][0]);
+  groundMat.color.set({ day: '#ffffff', evening: '#a49aa8', night: '#5d6680' }[m]); groundMat.emissiveIntensity = { day: 0.15, evening: 0.9, night: 1.3 }[m];
   document.querySelectorAll('#tod button').forEach((b) => b.classList.toggle('on', b.dataset.m === todMode));
 }
 document.querySelectorAll('#tod button').forEach((b) => b.addEventListener('click', () => { todMode = b.dataset.m; applyTod(true); }));

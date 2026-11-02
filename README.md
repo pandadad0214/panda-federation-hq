@@ -27,7 +27,7 @@ URL flags: `?simulate=1`, `?tod=day|evening|night`, `?hq=1` (lock effects on, us
 
 ## Look (v3)
 The office sits mid-way up a glass tower: facade with floors below (lit windows show glimpses of other offices, decor only),
-a few low-poly towers in the distance, framed-glass partitions with doorways around every department, and a gym corner by the windows.
+a few low-poly towers in the distance standing on a hazy city ground (streets, blocks, street lights; one instanced draw call) under a sky panel that follows Day/Evening/Night, framed-glass partitions with doorways around every department, and a gym corner by the windows.
 Each bot's chibi is restyled after its profile picture (per-part vertex colors + small low-poly add-ons: horns, hair, ears, hood…).
 Seated poses sit on the cushion (`SEAT_FIT` in main.js). `window.__hq.project/camera/place` exist for the screenshot scripts only.
 
