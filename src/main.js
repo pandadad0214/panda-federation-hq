@@ -17,6 +17,7 @@ const QS = new URLSearchParams(location.search);
 const TEAM = [ // colors + looks follow each bot's own profile picture
   { id: 'overlord', name: 'Overlord Boss', short: 'Overlord', color: '#6a3c9c', dept: 'Leadership', acc: 'club' },
   { id: 'moneybot', name: 'Moneybot', short: 'Moneybot', color: '#2fbf4a', dept: 'Money Lab', acc: 'coin' },
+  { id: 'mini', name: 'Mini-Money', short: 'Mini-Money', color: '#5ecf6a', dept: 'Money Lab', acc: 'clipboard' },
   { id: 'stockbot', name: 'Stockbot', short: 'Stockbot', color: '#d6dbe2', dept: 'Money Lab', acc: 'tablet' },
   { id: 'superseller', name: 'eBay Superbot', short: 'eBay Superbot', color: '#3a6fc4', dept: 'Sales', acc: 'box' },
   { id: 'ledger', name: 'Family Ledger', short: 'Ledger', color: '#2f7a5a', dept: 'Family Finance', acc: 'book' },
@@ -30,6 +31,7 @@ const TEAM = [ // colors + looks follow each bot's own profile picture
 const LOOKS = {
   overlord: { head: '#c9956f', torso: '#5b2d8a', chest: '#c9956f', arms: '#5b2d8a', hands: '#c9956f', legs: '#4a2a6e', eyes: 'dot' },
   moneybot: { head: '#2f7d44', torso: '#245e34', chest: '#14301f', arms: '#2f8a4c', hands: '#1a3d27', legs: '#1a3d27', eyes: 'glow', eyeColor: '#7dff6a' },
+  mini: { head: '#6ad078', torso: '#3d9a4e', chest: '#1a4024', arms: '#4eb85e', hands: '#2d6a38', legs: '#245a30', eyes: 'glow', eyeColor: '#b6ff8a' },
   stockbot: { head: '#eef1f4', torso: '#e8ebef', chest: '#1e2530', arms: '#b8bec7', hands: '#59616d', legs: '#4a5058', eyes: 'glow', eyeColor: '#5ff3ff' },
   superseller: { head: '#e6b994', torso: '#3d424b', chest: '#f1f1f1', arms: '#3d424b', hands: '#e6b994', legs: '#353a42', eyes: 'dot' },
   ledger: { head: '#e8c4a0', torso: '#2f6e55', chest: '#efe6cf', arms: '#2f6e55', hands: '#e8c4a0', legs: '#1f4a3a', eyes: 'dot' },
@@ -42,13 +44,14 @@ const LOOKS = {
 
 // desk chair spots (bot faces +z, desk in front of it)
 const DESKS = {
-  overlord: [-16, -9.1], moneybot: [-9.5, -9.1], stockbot: [-5.5, -9.1], superseller: [-0.2, -9.1], ledger: [6, -9.1],
+  overlord: [-16, -9.1], moneybot: [-10.4, -9.1], mini: [-7.5, -9.1], stockbot: [-4.6, -9.1], superseller: [-0.2, -9.1], ledger: [6, -9.1],
   shadow: [-16.5, 6.0], eraser: [-10.5, 6.0], kimchi: [-6.5, 6.0], scribe: [-1, 6.0],
   planner: [-18.2, -1.6], // front desk just outside Leadership, facing into the hall
 };
 // lounge: U-shaped sofas. [x, z, facing]
 const SEATS = [[3.69, 5.3, 0], [5.11, 5.3, 0], [6.64, 5.3, 0], [8.06, 5.3, 0], [9.59, 5.3, 0], [11.01, 5.3, 0],
-  [3.3, 8.1, Math.PI / 2], [11.1, 7.5, -Math.PI / 2, 1], [3.3, 9.5, Math.PI / 2], [11.1, 8.7, -Math.PI / 2, 1]];
+  [3.3, 8.1, Math.PI / 2], [11.1, 7.5, -Math.PI / 2, 1], [3.3, 9.5, Math.PI / 2], [11.1, 8.7, -Math.PI / 2, 1],
+  [6.64, 9.35, Math.PI]];
 const TRAY = [-14.4, -7.0];
 const KIT = 2.4; // Kenney furniture kit scale
 
@@ -162,19 +165,19 @@ function prop(name, x, z, ry = 0, { s = KIT, y = 0, recolor = {}, parent = scene
 // ---------- room: floor slab, back walls, window wall ----------
 const W = 40, D = 28, WH = 3.9;
 const floorTex = canvasTex(2048, 2048, (g, w, h) => {
-  const rows = 16, rh = h / rows;
-  const tones = ['#d2843f', '#c87a39', '#da9048', '#cd8040', '#c27434', '#d68b45'];
+  const rows = 22, rh = h / rows;
+  const tones = ['#4a2f1c', '#3f2718', '#352114', '#553522', '#462a19', '#3a2315'];
   for (let r = 0; r < rows; r++) {
     let x = -((r * 397) % 700);
     while (x < w) {
-      const len = 520 + ((r * 131 + x) % 380);
+      const len = 420 + ((r * 131 + Math.abs(x)) % 280);
       g.fillStyle = tones[(r * 7 + Math.abs(Math.floor(x / 97))) % tones.length]; g.fillRect(x, r * rh, len, rh);
-      g.globalAlpha = 0.08; g.fillStyle = '#6b3d1c';
-      for (let k = 0; k < 6; k++) g.fillRect(x + 20, r * rh + 12 + k * (rh - 24) / 6, len - 40, 2);
-      g.globalAlpha = 1; g.fillStyle = 'rgba(70,38,16,.55)'; g.fillRect(x, r * rh, 4, rh);
+      g.globalAlpha = 0.07; g.fillStyle = '#1a0e08';
+      for (let k = 0; k < 4; k++) g.fillRect(x + 16, r * rh + 8 + k * (rh - 16) / 4, len - 32, 1);
+      g.globalAlpha = 1; g.fillStyle = 'rgba(18,10,6,.5)'; g.fillRect(x, r * rh, 3, rh);
       x += len;
     }
-    g.fillStyle = 'rgba(70,38,16,.6)'; g.fillRect(0, r * rh, w, 4);
+    g.fillStyle = 'rgba(18,10,6,.55)'; g.fillRect(0, r * rh, w, 3);
   }
 });
 floorTex.wrapS = floorTex.wrapT = THREE.RepeatWrapping; floorTex.repeat.set(W / 9, D / 9);
@@ -222,13 +225,13 @@ box(0.12, 0.06, D, FRAME, 20.1, 1.0, 0);
 // decor only: the lit windows are other floors of the building, not status data
 let seed = 7; const srand = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
 const FLOOR_H = 4.3, FLOORS = 12, TOWER_H = FLOOR_H * FLOORS, GROUND_Y = -0.7 - TOWER_H;
-function facadeTex(widthW, cols) {
-  const PXW = 40, w = Math.round(widthW * PXW), h = Math.round(TOWER_H * PXW);
+function facadeTex(widthW, cols, floors = FLOORS) {
+  const PXW = 40, w = Math.round(widthW * PXW), h = Math.round(floors * FLOOR_H * PXW);
   const base = canvasTex(w, h, () => {}), glow = canvasTex(w, h, () => {});
   const g = base.userData.g, e = glow.userData.g;
   g.fillStyle = '#2a3242'; g.fillRect(0, 0, w, h); e.fillStyle = '#000'; e.fillRect(0, 0, w, h);
   const fh = FLOOR_H * PXW, band = 0.9 * PXW, cw = w / cols;
-  for (let f = 0; f < FLOORS; f++) {
+  for (let f = 0; f < floors; f++) {
     const y0 = f * fh + band, gh = fh - band;
     for (let c = 0; c < cols; c++) {
       const x0 = c * cw + 3, ww = cw - 6;
@@ -256,9 +259,11 @@ function facadeTex(widthW, cols) {
   return new THREE.MeshStandardMaterial({ map: base, emissiveMap: glow, emissive: '#ffffff', emissiveIntensity: 1, roughness: 0.5, metalness: 0.1 });
 }
 const facadeX = facadeTex(D + 0.6, 12), facadeZ = facadeTex(W + 0.6, 17), towerDark = mat('#141a26');
+const OUTSIDE0 = scene.children.length; // everything from here to the sky backdrop stays put when the office floor peels back
 const tower = new THREE.Mesh(new THREE.BoxGeometry(W + 0.6, TOWER_H, D + 0.6), [towerDark, facadeX, towerDark, towerDark, facadeZ, towerDark]);
-tower.position.set(0, -0.7 - TOWER_H / 2, 0); scene.add(tower);
-box(W + 1.0, 0.18, D + 1.0, '#5b6678', 0, -0.62, 0); // floor-plate ledge under our office
+// one story lower than the office slab: the gap is the apartment floor (base sinks below the hazy ground)
+tower.position.set(0, -0.7 - FLOOR_H - TOWER_H / 2, 0); scene.add(tower);
+const officeLedge = box(W + 1.0, 0.18, D + 1.0, '#5b6678', 0, -0.62, 0); // floor-plate ledge under our office
 // distant towers (cheap boxes sharing one window texture), behind the room from the camera's view
 const skyWin = canvasTex(256, 512, (g, w, h) => { g.fillStyle = '#000'; g.fillRect(0, 0, w, h);
   for (let y = 6; y < h; y += 16) for (let x = 6; x < w; x += 14) if (srand() < 0.14) { g.fillStyle = srand() < 0.8 ? '#ffd48a' : '#bfe0ff'; g.fillRect(x, y, 6, 8); } });
@@ -322,22 +327,40 @@ const SKY_H = 40; // the default framing sees roughly the lowest 10-25 units of 
 const skyBack = new THREE.Mesh(new THREE.PlaneGeometry(G_SIDE * 2, SKY_H), new THREE.MeshBasicMaterial({ map: skyBackTex, fog: false }));
 skyBack.rotation.y = -Math.PI / 2; skyBack.position.set(G_FAR, SKY_H / 2, 0); cityG.add(skyBack);
 scene.fog = new THREE.Fog('#c9dff0', 165, 215);
+const OUTSIDE = new Set(scene.children.slice(OUTSIDE0)); OUTSIDE.delete(officeLedge);
 
 // ---------- department rugs with glowing edges + lettering ----------
 const ZONES = [
-  { name: 'LEADERSHIP', x0: -20, x1: -12, z0: -14, z1: -3, color: '#6a3c9c', glow: '#b48cff', back: true },
-  { name: 'MONEY LAB', x0: -12, x1: -3, z0: -14, z1: -3, color: '#2f8a4c', glow: '#7dff9e' },
-  { name: 'SALES', x0: -3, x1: 3, z0: -14, z1: -3, color: '#2d5fb4', glow: '#7fb4ff' },
-  { name: 'FAMILY FINANCE', x0: 3, x1: 9, z0: -14, z1: -3, color: '#1c8a86', glow: '#6ff7ea' },
-  { name: 'RESEARCH', x0: 9, x1: 20, z0: -14, z1: -3, color: '#24386c', glow: '#5f8dff' },
-  { name: 'FRONT DESK', x0: -20, x1: -15.6, z0: -3, z1: 3, color: '#7d5cc4', glow: '#c9b2ff' },
-  { name: 'SCHOOL', x0: -20, x1: -13, z0: 3, z1: 14, color: '#7a3f9a', glow: '#e08cff' },
-  { name: 'IDENTITY SECURITY', x0: -13, x1: -4, z0: 3, z1: 14, color: '#2f4a6e', glow: '#6fd3ff' },
-  { name: "WRITERS' DEN", x0: -4, x1: 2, z0: 3, z1: 14, color: '#b0532a', glow: '#ffae6b' },
-  { name: 'LOUNGE', x0: 2, x1: 12, z0: 3, z1: 14, color: '#2f9a4f', glow: '#86ff8a', round: true },
-  { name: 'BREAK ROOM', x0: 12, x1: 20, z0: 3, z1: 14, color: '#9aa0a6', glow: null, tile: true },
-  { name: 'GYM', x0: 12, x1: 20, z0: -3, z1: 3, color: '#343a46', glow: '#ff8a5c' },
+  { name: 'LEADERSHIP', x0: -20, x1: -12, z0: -14, z1: -3, color: '#6a3c9c', glow: '#b48cff', back: true, floor: 'wood' },
+  { name: 'MONEY LAB', x0: -12, x1: -3, z0: -14, z1: -3, color: '#2f8a4c', glow: '#7dff9e', floor: 'wood' },
+  { name: 'SALES', x0: -3, x1: 3, z0: -14, z1: -3, color: '#2d5fb4', glow: '#7fb4ff', floor: 'wood' },
+  { name: 'FAMILY FINANCE', x0: 3, x1: 9, z0: -14, z1: -3, color: '#1c8a86', glow: '#6ff7ea', floor: 'wood' },
+  { name: 'RESEARCH', x0: 9, x1: 20, z0: -14, z1: -3, color: '#24386c', glow: '#5f8dff', floor: 'wood' },
+  { name: 'FRONT DESK', x0: -20, x1: -15.6, z0: -3, z1: 3, color: '#7d5cc4', glow: '#c9b2ff', floor: 'wood', labelX0: -18.05 }, // lettering clears the elevator
+  { name: 'RESTROOM', x0: 8, x1: 12, z0: -3, z1: 1.4, color: '#5d6a78', glow: '#bfe6ff', floor: 'tile' },
+  { name: 'SCHOOL', x0: -20, x1: -13, z0: 3, z1: 14, color: '#7a3f9a', glow: '#e08cff', floor: 'lino' },
+  { name: 'IDENTITY SECURITY', x0: -13, x1: -4, z0: 3, z1: 14, color: '#2f4a6e', glow: '#6fd3ff', floor: 'tech' },
+  { name: "WRITERS' DEN", x0: -4, x1: 2, z0: 3, z1: 14, color: '#b0532a', glow: '#ffae6b', floor: 'wood' },
+  { name: 'LOUNGE', x0: 2, x1: 12, z0: 3, z1: 14, color: '#2f9a4f', glow: '#86ff8a', round: true, floor: 'carpet' },
+  { name: 'BREAK ROOM', x0: 12, x1: 20, z0: 3, z1: 14, color: '#9aa0a6', glow: null, tile: true, floor: 'tile' },
+  { name: 'GYM', x0: 12, x1: 20, z0: -3, z1: 3, color: '#343a46', glow: '#ff8a5c', floor: 'gym' },
 ];
+function drawPlanks(g, cw, ch, tones, rows = 18) {
+  const rh = ch / rows;
+  for (let r = 0; r < rows; r++) {
+    let x = -((r * 397) % 700);
+    while (x < cw) {
+      const len = 280 + ((r * 131 + Math.abs(x)) % 260);
+      g.fillStyle = tones[(r * 7 + Math.abs(Math.floor(x / 97))) % tones.length];
+      g.fillRect(x, r * rh, len, rh + 1);
+      g.globalAlpha = 0.07; g.fillStyle = '#140a06';
+      for (let k = 0; k < 4; k++) g.fillRect(x + 12, r * rh + 6 + k * (rh - 12) / 4, len - 24, 1);
+      g.globalAlpha = 1; g.fillStyle = 'rgba(16,8,4,.45)'; g.fillRect(x, r * rh, 2, rh);
+      x += len;
+    }
+    g.fillStyle = 'rgba(16,8,4,.5)'; g.fillRect(0, r * rh, cw, 2);
+  }
+}
 const glowMats = [];
 for (const z of ZONES) {
   const inset = z.x1 === 20 ? 0.9 : 0.75;
@@ -349,25 +372,51 @@ for (const z of ZONES) {
   const tex = canvasTex(cw, ch, (g) => {
     g.clearRect(0, 0, cw, ch);
     const r = z.round ? Math.min(cw, ch) / 2.2 : 0.35 * sx;
-    if (z.tile) {
+    const kind = z.floor || (z.tile ? 'tile' : z.round ? 'carpet' : 'wood');
+    if (kind === 'tile') {
       g.fillStyle = '#b7bcc2'; g.fillRect(0, 0, cw, ch);
       g.strokeStyle = 'rgba(90,96,104,.45)'; g.lineWidth = 4;
       for (let x = 0; x < cw; x += 0.8 * sx) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, ch); g.stroke(); }
       for (let y = 0; y < ch; y += 0.8 * sy) { g.beginPath(); g.moveTo(0, y); g.lineTo(cw, y); g.stroke(); }
-    } else {
+    } else if (kind === 'carpet') {
       rr(g, 6, 6, cw - 12, ch - 12, r); g.fillStyle = z.color; g.fill();
       g.globalAlpha = 0.12; g.strokeStyle = '#000'; g.lineWidth = 3;
       for (let y = 20; y < ch; y += 14) { g.beginPath(); g.moveTo(0, y); g.lineTo(cw, y); g.stroke(); }
       g.globalAlpha = 1;
       rr(g, 0.28 * sx, 0.28 * sy, cw - 0.56 * sx, ch - 0.56 * sy, Math.max(4, r - 0.28 * sx)); g.strokeStyle = 'rgba(255,255,255,.16)'; g.lineWidth = 5; g.stroke();
+    } else if (kind === 'gym') {
+      drawPlanks(g, cw, ch, ['#c9a066', '#be9560', '#d4ab70', '#b88c55', '#c49b62', '#ae854c'], 14);
+      g.strokeStyle = 'rgba(255,255,255,.35)'; g.lineWidth = 6;
+      g.strokeRect(0.18 * sx, 0.18 * sy, cw - 0.36 * sx, ch - 0.36 * sy);
+      g.beginPath(); g.arc(cw / 2, ch / 2, Math.min(cw, ch) * 0.16, 0, 7); g.stroke();
+    } else if (kind === 'lino') {
+      const tw0 = 0.55 * sx, th0 = 0.55 * sy;
+      for (let y = 0, row = 0; y < ch; y += th0, row++) {
+        for (let x = 0, col = 0; x < cw; x += tw0, col++) {
+          g.fillStyle = (row + col) % 2 ? '#cbbb9c' : '#d4c6a8'; g.fillRect(x, y, tw0 + 1, th0 + 1);
+        }
+      }
+      g.strokeStyle = 'rgba(140,124,96,.35)'; g.lineWidth = 2;
+      for (let x = 0; x < cw; x += tw0) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, ch); g.stroke(); }
+      for (let y = 0; y < ch; y += th0) { g.beginPath(); g.moveTo(0, y); g.lineTo(cw, y); g.stroke(); }
+    } else if (kind === 'tech') {
+      g.fillStyle = '#2a3140'; g.fillRect(0, 0, cw, ch);
+      g.strokeStyle = 'rgba(111,211,255,.10)'; g.lineWidth = 2;
+      const step = 0.45 * sx;
+      for (let x = 0; x < cw; x += step) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, ch); g.stroke(); }
+      for (let y = 0; y < ch; y += step) { g.beginPath(); g.moveTo(0, y); g.lineTo(cw, y); g.stroke(); }
+    } else {
+      drawPlanks(g, cw, ch, ['#4a2f1c', '#3f2718', '#352114', '#553522', '#462a19', '#3a2315'], 16);
     }
     // lettering along the front (camera-side) edge
     let size = band * sy * 0.56; const sp = 0.12;
     const setF = () => { g.font = `800 ${size}px ${FONT}`; if ('letterSpacing' in g) g.letterSpacing = `${size * sp}px`; };
-    setF(); const maxW = (z.round ? 0.55 : 0.86) * cw; const tw = g.measureText(z.name).width;
+    const lx0 = z.labelX0 != null ? Math.max(0, (z.labelX0 - x0) * sx) : 0, lw = cw - lx0;
+    setF(); const maxW = (z.round ? 0.55 : 0.86) * lw; const tw = g.measureText(z.name).width;
     if (tw > maxW) { size *= maxW / tw; setF(); }
-    g.fillStyle = z.tile ? 'rgba(52,58,66,.85)' : 'rgba(255,255,255,.9)'; g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.fillText(z.name, cw / 2, z.back ? band * 0.62 * sy : ch - (z.round ? band * 1.5 : band * 0.62) * sy);
+    const lightFloor = kind === 'tile' || kind === 'lino' || kind === 'gym';
+    g.fillStyle = lightFloor ? 'rgba(52,58,66,.85)' : 'rgba(255,255,255,.9)'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText(z.name, lx0 + lw / 2, z.back ? band * 0.62 * sy : ch - (z.round ? band * 1.5 : band * 0.62) * sy);
   });
   const rug = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshStandardMaterial({ map: tex, transparent: true, roughness: 1, metalness: 0, polygonOffset: true, polygonOffsetFactor: -1 }));
   rug.rotation.x = -Math.PI / 2; rug.position.set(cx, 0.012, cz); rug.receiveShadow = true; scene.add(rug);
@@ -394,21 +443,21 @@ glassWall(-12, -14, -12, -3); glassWall(-20, -3, -14.7, -3); glassWall(-13.1, -3
 
 // ---------- office partitions: framed glass with doorways, so every department is its own room ----------
 const frost = new THREE.MeshStandardMaterial({ color: '#ffffff', transparent: true, opacity: 0.38, roughness: 0.5, metalness: 0, depthWrite: false });
-function partition(x0, z0, x1, z1, doors = [], h = 2.6) { // axis-aligned wall from (x0,z0) to (x1,z1); doors: [from,to] along the wall
+function partition(x0, z0, x1, z1, doors = [], h = 2.6, parent = scene, pane = glass) { // axis-aligned wall from (x0,z0) to (x1,z1); doors: [from,to] along the wall
   const alongX = z0 === z1, a0 = alongX ? x0 : z0, a1 = alongX ? x1 : z1;
   const at = (a, y, len, hh, d, m) => { const g = new THREE.Mesh(new THREE.BoxGeometry(alongX ? len : d, hh, alongX ? d : len), m);
-    g.position.set(alongX ? a : x0, y, alongX ? z0 : a); scene.add(g); return g; };
+    g.position.set(alongX ? a : x0, y, alongX ? z0 : a); parent.add(g); return g; };
   const cuts = [a0, ...doors.flat(), a1];
   for (let i = 0; i < cuts.length; i += 2) {
     const s0 = cuts[i], s1 = cuts[i + 1], len = s1 - s0, mid = (s0 + s1) / 2; if (len <= 0.05) continue;
-    at(mid, h / 2, len, h, 0.04, glass); at(mid, 1.35, len, 0.22, 0.05, frost);
+    at(mid, h / 2, len, h, 0.04, pane); at(mid, 1.35, len, 0.22, 0.05, frost);
     for (const yy of [0.04, h]) { const b = at(mid, yy, len, 0.07, 0.08, mat(FRAME)); b.castShadow = true; }
     for (const p of [s0, s1]) { const b = at(p, h / 2, 0.08, h, 0.08, mat(FRAME)); b.castShadow = true; }
   }
   for (const [d0, d1] of doors) at((d0 + d1) / 2, h - 0.18, d1 - d0, 0.3, 0.06, mat(FRAME)); // door header
 }
 // north row (hall side z = -3) + side walls
-partition(-12, -3, 20, -3, [[-8.9, -7.6], [-4.9, -3.6], [0.4, 1.7], [6.6, 7.9], [10.0, 11.4]]);
+partition(-12, -3, 20, -3, [[-8.9, -7.6], [-4.9, -3.6], [0.4, 1.7], [6.6, 7.9], [12.5, 13.9]]); // research door opens beside the gym, not into the restroom
 partition(-3.3, -14, -3.3, -3); partition(3, -14, 3, -3); partition(9, -14, 9, -3);
 // south row (hall side z = 3) + side walls; Writers' Den has an open front, lounge is reached through its side door
 partition(-20, 3, -1.7, 3, [[-17.15, -15.85], [-11.2, -9.8], [-7.2, -5.8]]);
@@ -472,7 +521,7 @@ prop('bookcaseOpen', -19.3, -9.0, Math.PI / 2); prop('lampRoundFloor', -19.2, -5
 // ---------- decor ----------
 const pl = (x, z, big) => prop(big ? 'pottedPlant' : 'plantSmall1', x, z, rand(0, 6), { s: big ? 2.6 : 2.4 });
 [[-12.6, -13.3, 1], [-3.9, -13.3, 1], [3.6, -13.3, 0], [8.4, -13.3, 1], [-13.6, 13.4, 1], [-3.4, 13.4, 0], [2.6, 13.4, 1], [12.6, 13.4, 1],
-  [19.2, 13.3, 1], [-19.7, 0.7, 1], [-19.55, -0.75, 0], [11.6, 3.4, 0]].forEach(([x, z, b]) => pl(x, z, b));
+  [19.2, 13.3, 1], [-19.55, -0.75, 0], [11.6, 3.4, 0]].forEach(([x, z, b]) => pl(x, z, b));
 prop('bookcaseOpen', -18.6, 3.7, 0); prop('bookcaseOpen', -17.6, 3.7, 0);
 // writers' den whiteboard + identity file cabinets
 rbox(0.6, 1.1, 0.6, '#505a6a', -12.4, 0.55, 4.0, scene, {}, 0.06); rbox(0.6, 1.1, 0.6, '#505a6a', -12.4, 0.55, 4.7, scene, {}, 0.06);
@@ -624,12 +673,97 @@ rbox(2.7, 0.8, 0.06, '#151a22', 16.66, 2.3, 3.4, scene, {}, 0.03);
     for (const dz of [-0.14, 0.14]) { const hd = cyl(0.07, 0.07, 0.09, c, x, y, 2.3 + dz, scene, 6); hd.rotation.x = Math.PI / 2; } }
   // yoga mat, exercise ball, kettlebells
   rbox(2.0, 0.03, 0.8, '#2a9d8f', 17.2, 0.03, 0.9, scene, { roughness: 1 }, 0.01);
-  const ball = new THREE.Mesh(new THREE.SphereGeometry(0.34, 20, 14), mat('#7d5cc4', { roughness: 0.5 })); ball.position.set(13.3, 0.34, 1.4); ball.castShadow = true; scene.add(ball);
+  const ball = new THREE.Mesh(new THREE.SphereGeometry(0.34, 20, 14), mat('#7d5cc4', { roughness: 0.5 })); ball.position.set(13.5, 0.34, 0.4); ball.castShadow = true; scene.add(ball);
   for (const [x, z, r] of [[19.2, 1.4, 0.16], [19.2, 1.9, 0.19], [19.25, 0.9, 0.14]]) {
     const kb = new THREE.Mesh(new THREE.SphereGeometry(r, 14, 10), mat(BLK, { roughness: 0.6 })); kb.position.set(x, r * 0.9, z); kb.castShadow = true; scene.add(kb);
     const hd = new THREE.Mesh(new THREE.TorusGeometry(r * 0.6, r * 0.14, 6, 14, Math.PI), kb.material); hd.position.set(x, r * 1.7, z); hd.rotation.y = Math.PI / 2; scene.add(hd); }
-  prop('pottedPlant', 12.6, -2.4, 0, { s: 2.6 });
+  prop('pottedPlant', 19.35, -2.55, 0, { s: 2.6 });
 }
+
+// ---------- restroom (hall, west of the gym): frosted framed glass, two stalls, vanity with two sinks + mirror ----------
+// a walkway stays open between the restroom and the lounge wall (z 1.4..3) to the gym and the break-room door
+const roomGlass = new THREE.MeshStandardMaterial({ color: '#e4ecf1', transparent: true, opacity: 0.5, roughness: 0.35, metalness: 0, depthWrite: false });
+const stallMat = new THREE.MeshStandardMaterial({ color: '#dfe5ea', transparent: true, opacity: 0.9, roughness: 0.45, metalness: 0, depthWrite: false });
+const stallDoorMat = new THREE.MeshStandardMaterial({ color: '#cdd6de', transparent: true, opacity: 0.94, roughness: 0.45, metalness: 0, depthWrite: false });
+const STEEL = mat('#aeb6bf', { roughness: 0.32, metalness: 0.6 }), PORCELAIN = mat('#f7f7f4', { roughness: 0.35 });
+partition(8, -3, 8, 1.4, [[-0.6, 0.6]], 2.6, scene, roomGlass); // west wall, doorway from the hall
+partition(8, 1.4, 12, 1.4, [], 2.6, scene, roomGlass);
+partition(12, -3, 12, 1.4, [], 2.6, scene, roomGlass);
+{
+  // tiled back wall behind the vanity (hides the research room glass), mirror, towel dispenser, bin
+  rbox(2.35, 2.5, 0.05, '#dcd8cf', 9.22, 1.27, -2.93, scene, { roughness: 0.7 }, 0.02);
+  const mirror = rbox(1.7, 0.9, 0.03, mat('#b9c7d1', { roughness: 0.12, metalness: 0.55 }), 9.05, 1.75, -2.885, scene, {}, 0.01); mirror.castShadow = false;
+  rbox(1.78, 0.98, 0.02, FRAME, 9.05, 1.75, -2.9, scene, {}, 0.01);
+  rbox(0.32, 0.42, 0.12, '#eef0f2', 10.15, 1.35, -2.85, scene, {}, 0.03); box(0.2, 0.02, 0.02, '#9aa3ae', 10.15, 1.16, -2.79); // paper towels
+  cyl(0.15, 0.13, 0.42, '#9aa3ae', 10.15, 0.21, -2.62, scene, 16);
+  // vanity: walnut cabinet, stone top, two vessel sinks with faucets + soap
+  rbox(1.8, 0.78, 0.5, '#3b2a20', 9.05, 0.39, -2.68, scene, {}, 0.03);
+  rbox(1.86, 0.06, 0.58, '#eceae6', 9.05, 0.81, -2.66, scene, { roughness: 0.5 }, 0.02);
+  for (const sx of [8.6, 9.5]) {
+    cyl(0.19, 0.15, 0.1, PORCELAIN, sx, 0.89, -2.62, scene, 24);
+    cyl(0.016, 0.016, 0.2, STEEL, sx, 0.94, -2.85, scene, 8); box(0.03, 0.03, 0.14, STEEL, sx, 1.03, -2.79);
+    cyl(0.035, 0.035, 0.12, '#8fb3a5', sx + 0.3, 0.9, -2.82, scene, 10); cyl(0.012, 0.012, 0.05, STEEL, sx + 0.3, 0.98, -2.82, scene, 6);
+  }
+  // two stalls along the east wall (frosted, lifted off the floor), doors face the room
+  const SX0 = 10.4, SX1 = 12, SY = 1.15, SH = 2.0;
+  box(SX1 - SX0, SH, 0.05, stallMat, (SX0 + SX1) / 2, SY, -1.8); box(SX1 - SX0, SH, 0.05, stallMat, (SX0 + SX1) / 2, SY, -0.6);
+  box(0.06, 0.06, 2.4, FRAME, SX0, SY + SH / 2 + 0.03, -1.8);
+  for (const [a, b] of [[-3, -1.8], [-1.8, -0.6]]) {
+    const zc = (a + b) / 2;
+    box(0.05, SH, 0.2, stallMat, SX0, SY, a + 0.1); box(0.05, SH, 0.2, stallMat, SX0, SY, b - 0.1);
+    box(0.05, SH - 0.04, 0.76, stallDoorMat, SX0, SY, zc); box(0.03, 0.12, 0.03, STEEL, SX0 - 0.04, 1.05, zc + 0.26);
+    for (const zz of [a + 0.03, b - 0.03]) box(0.05, 0.15, 0.05, STEEL, SX0, 0.075, zz); // stall feet
+    // toilet: bowl, seat, tank against the wall; paper roll on the stall side
+    const bowl = cyl(0.19, 0.15, 0.38, PORCELAIN, 11.38, 0.19, zc, scene, 20); bowl.scale.x = 1.25;
+    const seat = cyl(0.21, 0.21, 0.04, PORCELAIN, 11.38, 0.4, zc, scene, 20); seat.scale.x = 1.25;
+    rbox(0.22, 0.46, 0.46, PORCELAIN, 11.86, 0.62, zc, scene, {}, 0.04);
+    const roll = cyl(0.06, 0.06, 0.11, '#fbfbf8', 10.85, 0.72, b - 0.08, scene, 12); roll.rotation.x = Math.PI / 2;
+  }
+  prop('plantSmall1', 11.6, 1.0, 0.4, { s: 2.6 });
+}
+const SINKS = [[8.6, -1.95], [9.5, -1.95]]; // standing spots at the vanity (face the mirror, -z)
+
+// ---------- elevator: glass shaft beside the front desk, doors open onto the hall; same footprint on the apartment floor ----------
+const ELEV = { x0: -20, x1: -18.2, z0: 0.7, z1: 2.9, cx: -19.1, cz: 1.8, landX: -16.9, doorX: -18.2 };
+const elevSignTex = canvasTex(256, 96, (g, w, h) => { g.fillStyle = '#0c0f15'; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#ffcf7a'; for (const [cx, up] of [[84, 1], [172, 0]]) { g.beginPath(); g.moveTo(cx - 22, up ? 64 : 32); g.lineTo(cx + 22, up ? 64 : 32); g.lineTo(cx, up ? 26 : 70); g.fill(); } });
+const elevLightMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(2.0, 1.85, 1.55) });
+const doorSteel = mat('#c3cad2', { roughness: 0.28, metalness: 0.65 });
+function buildElevator(parent, h) {
+  const grp = new THREE.Group(); parent.add(grp);
+  const { x0, x1, z0, z1, cx, cz } = ELEV, wx = x1 - x0, wz = z1 - z0;
+  rbox(wx - 0.08, 0.05, wz - 0.08, '#3a404c', cx, 0.025, cz, grp, { roughness: 0.6 }, 0.02); // cab floor
+  for (const [px, pz] of [[x0 + 0.05, z0 + 0.05], [x0 + 0.05, z1 - 0.05], [x1 - 0.05, z0 + 0.05], [x1 - 0.05, z1 - 0.05]]) box(0.1, h, 0.1, FRAME, px, h / 2, pz, grp);
+  for (const [w, d, x, z] of [[0.04, wz - 0.1, x0 + 0.05, cz], [wx - 0.1, 0.04, cx, z0 + 0.05], [wx - 0.1, 0.04, cx, z1 - 0.05]]) {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h - 0.1, d), glass); m.position.set(x, h / 2, z); grp.add(m); }
+  for (const [w, d, x, z] of [[wx, 0.12, cx, z0 + 0.05], [wx, 0.12, cx, z1 - 0.05], [0.12, wz, x0 + 0.05, cz], [0.12, wz, x1 - 0.05, cz]]) box(w, 0.12, d, FRAME, x, h - 0.06, z, grp);
+  for (const yy of [0.04, 2.5]) box(wx - 0.1, 0.05, 0.06, FRAME, cx, yy, z1 - 0.05, grp); // cab rails seen through the glass
+  // cab: walnut back panel + steel handrail, lit ceiling
+  rbox(wx - 0.3, 2.2, 0.05, '#4a2f1c', cx, 1.2, z0 + 0.12, grp, {}, 0.02);
+  box(wx - 0.45, 0.04, 0.04, STEEL, cx, 0.95, z0 + 0.2, grp);
+  rbox(wx - 0.14, 0.06, wz - 0.14, '#232a36', cx, 2.5, cz, grp, {}, 0.02);
+  box(wx - 0.6, 0.02, wz - 0.8, elevLightMat, cx, 2.465, cz, grp);
+  // hall face: steel jambs + header around the doorway (z 1.25..2.35)
+  box(0.08, 2.5, 1.25 - z0 - 0.1, STEEL, x1 - 0.04, 1.25, (z0 + 0.1 + 1.25) / 2, grp);
+  box(0.08, 2.5, z1 - 0.1 - 2.35, STEEL, x1 - 0.04, 1.25, (2.35 + z1 - 0.1) / 2, grp);
+  box(0.08, 0.32, wz - 0.2, STEEL, x1 - 0.04, 2.56, cz, grp);
+  const sign = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.19), new THREE.MeshBasicMaterial({ map: elevSignTex, color: new THREE.Color(1.6, 1.6, 1.6) }));
+  sign.rotation.y = Math.PI / 2; sign.position.set(x1 + 0.005, 2.58, cz); grp.add(sign);
+  const sign2 = new THREE.Mesh(sign.geometry, sign.material); sign2.position.set(cx, h - 0.3, z1 + 0.01); grp.add(sign2); // indicator on the front face too
+  rbox(0.56, 0.24, 0.03, '#0c0f15', cx, h - 0.3, z1 - 0.005, grp, {}, 0.01);
+  for (const gz of [z0 + 0.32, z1 - 0.32]) box(0.06, h - 0.2, 0.06, STEEL, x0 + 0.16, h / 2, gz, grp); // guide rails
+  for (const dz of [-0.25, 0.25]) cyl(0.012, 0.012, h - 2.56, '#1b1e24', cx, (h + 2.53) / 2, cz + dz, grp, 6); // hoist cables
+  rbox(0.5, 0.04, 1.25, '#2c313b', x1 + 0.27, 0.02, cz, grp, { roughness: 0.6 }, 0.01); // landing threshold
+  box(0.04, 0.045, 1.25, '#e8b93a', x1 + 0.5, 0.022, cz, grp);
+  rbox(0.03, 0.28, 0.13, '#c9ced6', x1 + 0.01, 1.15, 2.62, grp, {}, 0.01); // call buttons
+  for (const yy of [1.21, 1.09]) { const btn = new THREE.Mesh(new THREE.CircleGeometry(0.025, 12), new THREE.MeshBasicMaterial({ color: new THREE.Color(1.8, 1.5, 0.8) })); btn.rotation.y = Math.PI / 2; btn.position.set(x1 + 0.03, yy, 2.62); grp.add(btn); }
+  // doors: two leaves just inside the jambs, slide apart when someone is at the doorway
+  const leaves = [];
+  for (const s of [-1, 1]) leaves.push({ s, m: rbox(0.04, 2.36, 0.56, doorSteel, x1 - 0.12, 1.2, cz + s * 0.28, grp, {}, 0.01) });
+  return { grp, leaves, open: 0 };
+}
+const officeElev = buildElevator(scene, WH);
+rbox(ELEV.x1 - ELEV.x0 + 0.12, 0.1, ELEV.z1 - ELEV.z0 + 0.12, '#2c3546', ELEV.cx, WH + 0.05, ELEV.cz, officeElev.grp, {}, 0.03); // machine-room cap
 
 // ---------- research: animated screens + server racks ----------
 const SCR_W = 1024, SCR_H = 576;
@@ -739,6 +873,108 @@ for (const [x, y, z, inten] of [[-19.2, 2.0, -5.2, 6], [0.6, 2.0, 13.0, 5], [2.9
   const p = new THREE.PointLight(0xffc98a, inten, 7, 1.6); p.position.set(x, y, z); scene.add(p); lamps.push({ p, base: inten });
 }
 
+// ---------- the office floor as one layer: it peels back (hinged at the back wall) to show the apartments below ----------
+const hqPivot = new THREE.Group(); hqPivot.position.set(0, 0, -14.3);
+const hq = new THREE.Group(); hq.position.set(0, 0, 14.3); hqPivot.add(hq); // identity in world space while closed
+for (const o of [...scene.children]) if (!o.isLight && o !== sun.target && !OUTSIDE.has(o)) hq.add(o);
+scene.add(hqPivot);
+
+// ---------- apartments: one story down, a studio per bot (decor only, no status data) ----------
+const AY = -FLOOR_H, AWH = FLOOR_H - 0.7; // apartment floor level; wall height up to the office slab
+const apt = new THREE.Group(); apt.position.y = AY; apt.visible = false; scene.add(apt); // drawn only while peeled back (see applyPeel)
+const aptFloorTex = canvasTex(2048, 2048, (g, w, h) => drawPlanks(g, w, h, ['#8a6440', '#7d5a39', '#94704a', '#6f4f32', '#86603d', '#7a5838'], 24));
+aptFloorTex.wrapS = aptFloorTex.wrapT = THREE.RepeatWrapping; aptFloorTex.repeat.set(W / 9, D / 9);
+{ const s2 = new THREE.Mesh(slab.geometry, [mat('#4a5466'), mat('#4a5466'), new THREE.MeshStandardMaterial({ map: aptFloorTex, roughness: 0.74, metalness: 0 }), mat('#2a3140'), mat('#556074'), mat('#4a5466')]);
+  s2.position.set(0, -0.35, 0); s2.receiveShadow = true; apt.add(s2); }
+box(W + 1.0, 0.18, D + 1.0, '#5b6678', 0, -0.62, 0, apt); // floor-plate ledge under the apartments
+// back wall (warm plaster) + window wall, same cutaway as upstairs
+rbox(W + 0.6, AWH, 0.35, '#6b5a4e', 0, AWH / 2, -14.17, apt, { roughness: 0.95 }, 0.05);
+box(W + 0.6, 0.16, 0.38, '#2a201b', 0, 0.08, -13.98, apt);
+{ const sk = new THREE.Mesh(new THREE.PlaneGeometry(D, AWH - 0.35), skyMat); sk.rotation.y = -Math.PI / 2; sk.position.set(20.3, 0.2 + (AWH - 0.35) / 2, 0); apt.add(sk);
+  const gp = new THREE.Mesh(sk.geometry, glassPane.material); gp.rotation.y = -Math.PI / 2; gp.position.set(20.05, sk.position.y, 0); apt.add(gp);
+  box(0.3, 0.2, D + 0.6, FRAME, 20.15, 0.1, 0, apt); box(0.3, 0.16, D + 0.6, FRAME, 20.15, AWH - 0.08, 0, apt);
+  for (let i = 0; i <= 8; i++) box(0.16, AWH, 0.12, FRAME, 20.12, AWH / 2, -14 + i * (D / 8), apt);
+  box(0.12, 0.06, D, FRAME, 20.1, 1.0, 0, apt); }
+// corridor runner + lettering by the elevator
+{ const rt = canvasTex(2048, 128, (g, w, h) => { g.fillStyle = '#4b3a52'; g.fillRect(0, 0, w, h); g.strokeStyle = 'rgba(232,185,58,.55)'; g.lineWidth = 6; g.strokeRect(10, 10, w - 20, h - 20);
+    g.globalAlpha = 0.1; g.fillStyle = '#000'; for (let x = 0; x < w; x += 18) g.fillRect(x, 0, 2, h); });
+  const run = new THREE.Mesh(new THREE.PlaneGeometry(35, 2.0), new THREE.MeshStandardMaterial({ map: rt, roughness: 1, metalness: 0, polygonOffset: true, polygonOffsetFactor: -1 }));
+  run.rotation.x = -Math.PI / 2; run.position.set(2.2, 0.012, 0.15); run.receiveShadow = true; apt.add(run);
+  const lt = canvasTex(1024, 160, (g, w, h) => { g.font = `800 96px ${FONT}`; if ('letterSpacing' in g) g.letterSpacing = '14px'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = 'rgba(255,255,255,.88)'; g.fillText('RESIDENCES', w / 2, h / 2); });
+  const lab = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 0.56), new THREE.MeshBasicMaterial({ map: lt, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, color: new THREE.Color(0.95, 0.9, 0.82) }));
+  lab.rotation.x = -Math.PI / 2; lab.position.set(-13.2, 0.02, 2.3); apt.add(lab); }
+const aptGlass = new THREE.MeshStandardMaterial({ color: '#f3e6d6', transparent: true, opacity: 0.26, roughness: 0.4, metalness: 0, depthWrite: false });
+const sconceMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(2.2, 1.7, 1.1) });
+const aptElev = buildElevator(apt, AWH);
+// studios: six on the back side of the corridor, five on the front side; each bot's own color
+const APT_S = ['overlord', 'moneybot', 'mini', 'stockbot', 'superseller', 'ledger'], APT_N = ['shadow', 'eraser', 'kimchi', 'scribe', 'planner'];
+const BEDS = {}; // id -> { x, z (root at the foot, body toward the headboard), facing, floorY, headZ, side (bedside x), via (inside-room x/z), door }
+const MATTRESS_TOP = 0.56;
+const soften = (hex, k = 0.42) => '#' + new THREE.Color(hex).lerp(new THREE.Color('#d9d2c6'), k).getHexString();
+const deepen = (hex, k = 0.55) => '#' + new THREE.Color(hex).multiplyScalar(k).getHexString();
+function nameTex(def) {
+  return canvasTex(512, 160, (g, w, h) => { g.fillStyle = '#efe7da'; rr(g, 4, 4, w - 8, h - 8, 26); g.fill();
+    g.fillStyle = def.color; rr(g, 4, 4, 34, h - 8, 18); g.fill();
+    g.fillStyle = '#2b2420'; let px = 74; g.font = `800 ${px}px ${FONT}`; const mw = w - 90; const tw = g.measureText(def.short).width; if (tw > mw) { px = Math.floor(px * mw / tw); g.font = `800 ${px}px ${FONT}`; }
+    g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(def.short, 38 + (w - 38) / 2, h / 2 + 3); });
+}
+const MAT_GEO = new THREE.PlaneGeometry(1.15, 0.36), PLAQUE_GEO = new THREE.PlaneGeometry(0.86, 0.27);
+function bedroom(def, x0, x1, back) { // back: room behind the corridor (z -14..-3), else in front (z 3..14)
+  const cx = (x0 + x1) / 2, col = def.color, P = apt;
+  const bx = back ? cx - 1.2 : x0 + 2.2, hz = back ? -13.9 : 3.12, dX = back ? cx + 1.8 : x1 - 1.6;
+  const len = 2.3, wid = 1.7, bcz = hz + 0.1 + len / 2, duvetZ0 = hz + 0.1 + len * 0.42, duvetZ1 = hz + 0.12 + len;
+  // bed: walnut frame, upholstered headboard in the bot's color, mattress, duvet (muted bot color), pillows
+  rbox(wid, 0.26, len, '#5a3a24', bx, 0.2, bcz, P, {}, 0.05);
+  rbox(wid + 0.12, 1.1, 0.14, deepen(col, 0.6), bx, 0.62, hz + 0.02, P, { roughness: 0.95 }, 0.06);
+  rbox(wid - 0.12, 0.24, len - 0.1, '#f2eee7', bx, MATTRESS_TOP - 0.12, bcz, P, {}, 0.07);
+  rbox(wid - 0.02, 0.2, duvetZ1 - duvetZ0, soften(col), bx, MATTRESS_TOP + 0.02, (duvetZ0 + duvetZ1) / 2, P, { roughness: 1 }, 0.08);
+  rbox(wid - 0.0, 0.07, 0.2, soften(col, 0.7), bx, MATTRESS_TOP + 0.11, duvetZ0 + 0.1, P, { roughness: 1 }, 0.03);
+  for (const sd of [-1, 1]) rbox(0.68, 0.14, 0.38, '#fbfaf6', bx + sd * 0.38, MATTRESS_TOP + 0.05, hz + 0.36, P, { roughness: 1 }, 0.07);
+  // nightstand + lamp, rug at the foot of the bed
+  const nx = bx - 1.25;
+  rbox(0.55, 0.55, 0.5, '#5a3a24', nx, 0.275, hz + 0.38, P, {}, 0.04); box(0.4, 0.02, 0.01, '#c9a24a', nx, 0.36, hz + 0.635, P);
+  prop('lampRoundFloor', nx, hz + 0.38, 0, { s: 0.75, y: 0.55, parent: P });
+  rbox(2.7, 0.02, 1.9, deepen(soften(col, 0.3), 0.8), bx, 0.01, duvetZ1 + 0.95, P, { roughness: 1 }, 0.01);
+  rbox(2.4, 0.024, 1.6, soften(col, 0.55), bx, 0.012, duvetZ1 + 0.95, P, { roughness: 1 }, 0.01);
+  // a chair, a plant, a bookcase; art in the bot's color on the back wall
+  if (back) {
+    prop('chair', cx + 1.55, -12.4, -Math.PI / 2 - 0.4, { parent: P, recolor: { wood: '#8a5a36' } });
+    prop('pottedPlant', x1 - 0.55, -13.45, 1.3, { s: 2.4, parent: P });
+    prop('bookcaseOpen', x1 - 0.42, -8.4, -Math.PI / 2, { parent: P });
+    for (const [ax, ay, aw, ah] of [[cx + 0.9, 1.9, 0.9, 0.7], [cx + 2.05, 1.75, 0.6, 0.85]]) {
+      rbox(aw, ah, 0.04, '#f1ece2', ax, ay, -13.96, P, {}, 0.01); rbox(aw - 0.16, ah - 0.16, 0.02, soften(col, 0.2), ax, ay, -13.93, P, {}, 0.01); }
+  } else {
+    prop('chair', x0 + 4.9, 10.6, Math.PI + 0.5, { parent: P, recolor: { wood: '#8a5a36' } });
+    prop('pottedPlant', x1 - 0.6, 13.3, 0.7, { s: 2.4, parent: P });
+    prop('bookcaseOpen', x0 + 0.42, 9.6, Math.PI / 2, { parent: P });
+  }
+  // name: doormat just inside the door (+ a plaque on the corridor side for the back row)
+  const nt = nameTex(def);
+  const dm = new THREE.Mesh(MAT_GEO, new THREE.MeshStandardMaterial({ map: nt, roughness: 1, metalness: 0, polygonOffset: true, polygonOffsetFactor: -2 }));
+  dm.rotation.x = -Math.PI / 2; dm.position.set(dX, 0.016, back ? -3.6 : 3.6); dm.receiveShadow = true; P.add(dm);
+  if (back) { const pq = new THREE.Mesh(PLAQUE_GEO, new THREE.MeshBasicMaterial({ map: nt, color: new THREE.Color(1.05, 1.05, 1.05) })); pq.position.set(dX - 1.25, 1.75, -2.955); P.add(pq);
+    rbox(0.92, 0.33, 0.02, '#2b2420', dX - 1.25, 1.75, -2.97, P, {}, 0.01); }
+  BEDS[def.id] = { x: bx, headZ: hz, facing: 0, floorY: AY, side: bx + 1.15, via: back ? -9.0 : 7.5, door: dX, back, wid, foot: duvetZ1, col, cover: null };
+}
+partition(-20, -3, 20, -3, APT_S.map((_, i) => { const cx = -20 + (i + 0.5) * W / 6; return [cx + 1.2, cx + 2.4]; }), 2.6, apt, aptGlass);
+partition(-20, 3, 20, 3, APT_N.map((_, i) => { const x1 = -20 + (i + 1) * 8; return [x1 - 2.2, x1 - 1.0]; }), 2.6, apt, aptGlass);
+for (let i = 1; i < 6; i++) partition(-20 + i * W / 6, -14, -20 + i * W / 6, -3, [], 2.6, apt, aptGlass);
+for (let i = 1; i < 5; i++) partition(-20 + i * 8, 3, -20 + i * 8, 14, [], 2.6, apt, aptGlass);
+APT_S.forEach((id, i) => bedroom(TEAM.find((t) => t.id === id), -20 + i * W / 6, -20 + (i + 1) * W / 6, true));
+APT_N.forEach((id, i) => bedroom(TEAM.find((t) => t.id === id), -20 + i * 8, -20 + (i + 1) * 8, false));
+// corridor: sconces between the doors, plants at the window end
+for (let i = 0; i < 6; i++) { const x = -20 + (i + 0.5) * W / 6 - 0.4; box(0.18, 0.28, 0.06, sconceMat, x, 2.0, -2.95, apt); }
+prop('pottedPlant', 19.45, -1.9, 0.3, { s: 2.6, parent: apt }); prop('pottedPlant', 19.45, 1.9, 2.1, { s: 2.6, parent: apt });
+// warm room lights for the apartment floor: only lit while it is the floor in view (so nothing leaks onto the office)
+const aptLights = [];
+for (const [x, z] of [[-10, -6], [9, -6], [0, 7.5]]) { const p = new THREE.PointLight(0xffd2a0, 0, 15, 1.4); p.position.set(x, AY + 2.9, z); scene.add(p); aptLights.push({ p, base: 7 }); }
+// outer skin of the apartment story (glass facade, like the tower below) — fades out as the office peels back
+const skinMats = [facadeTex(D + 0.6, 12, 1), facadeTex(W + 0.6, 17, 1)];
+const skins = [];
+{ const sx = new THREE.Mesh(new THREE.PlaneGeometry(D + 0.6, FLOOR_H), skinMats[0]); sx.rotation.y = -Math.PI / 2; sx.position.set(-20.31, -0.7 - FLOOR_H / 2, 0);
+  const sz = new THREE.Mesh(new THREE.PlaneGeometry(W + 0.6, FLOOR_H), skinMats[1]); sz.position.set(0, -0.7 - FLOOR_H / 2, 14.31);
+  for (const m of [sx, sz]) { scene.add(m); skins.push(m); } }
+
 // ---------- chibi bots (Kenney Mini Characters, recolored) ----------
 function accessory(kind) {
   const g = new THREE.Group();
@@ -774,13 +1010,20 @@ function accessory(kind) {
   return g;
 }
 const CHAR_H = 1.32;
-let charScale = 1, eyeSpec = null, headBox = null, torsoBox = null;
+let charScale = 1, eyeSpec = null, headBox = null, torsoBox = null, charBack = 0.3; // charBack: feet-origin to the back of the head (lying pose)
 if (charGltf) {
   const tmp = charGltf.scene; tmp.updateMatrixWorld(true);
-  const bb = new THREE.Box3().setFromObject(tmp); charScale = CHAR_H / (bb.max.y - bb.min.y);
+  const bb = new THREE.Box3().setFromObject(tmp); charScale = CHAR_H / (bb.max.y - bb.min.y); charBack = Math.max(0.1, -bb.min.z * charScale);
   const headMesh = tmp.getObjectByName('head-mesh');
   const hb = headMesh ? new THREE.Box3().setFromObject(headMesh) : null; headBox = hb;
   eyeSpec = hb ? { y: (hb.min.y + hb.max.y) / 2 - (hb.max.y - hb.min.y) * 0.06, z: hb.max.z + 0.002, dx: (hb.max.x - hb.min.x) * 0.17, r: (hb.max.x - hb.min.x) * 0.06, top: hb.max.y } : null;
+}
+// tucked-in blanket over the lower body, one per bed, shown only while its bot is asleep (sized from the character)
+for (const id in BEDS) {
+  const p = BEDS[id], sc = id === 'mini' ? 0.86 : 1, len = CHAR_H * sc, feetZ = p.headZ + 0.34 + len, rootY = MATTRESS_TOP + charBack * sc - 0.05, topY = rootY + 0.24 * sc;
+  const z0 = feetZ - len * 0.58, z1 = p.foot + 0.03;
+  p.cover = rbox(p.wid - 0.02, topY - MATTRESS_TOP + 0.06, z1 - z0, soften(p.col, 0.3), p.x, (topY + MATTRESS_TOP - 0.06) / 2, (z0 + z1) / 2, apt, { roughness: 1 }, 0.12);
+  p.cover.visible = false;
 }
 // paint the shared body mesh per bot: each vertex takes its body part's color (by dominant bone)
 function paintBody(mesh, look) {
@@ -865,6 +1108,9 @@ function decorate(id, put, putT) {
       for (const sd of [-1, 1]) { const e = bx(0.13, 0.55, 0.08, '#2f7d44', sd * 0.22, 0.55, -0.05, {}, 0.05); e.rotation.z = -sd * 0.18; bx(0.06, 0.4, 0.03, '#7dff6a', sd * 0.22, 0.56, -0.005, { emissive: '#3eff6c', emissiveIntensity: 0.6 }, 0.02).rotation.z = -sd * 0.18; }
       for (let k = 0; k < 5; k++) cone(0.08, 0.3, '#e8b93a', 0, 0.38 - Math.abs(k - 2) * 0.03, -0.25 + k * 0.12, -0.3 + k * 0.15, 0, 5);
       break;
+    case 'mini': // Mini-Money: shorter helper-bunny ears, no mohawk
+      for (const sd of [-1, 1]) { const e = bx(0.11, 0.38, 0.07, '#6ad078', sd * 0.2, 0.42, -0.05, {}, 0.05); e.rotation.z = -sd * 0.22; bx(0.05, 0.26, 0.025, '#b6ff8a', sd * 0.2, 0.43, -0.005, { emissive: '#7dff6a', emissiveIntensity: 0.45 }, 0.02).rotation.z = -sd * 0.22; }
+      break;
     case 'scribe': // Gatewalkers Guide: deep hood
       sph(0.56, '#151829', 0, 0.04, -0.08, 1, 0.92, 0.9, { roughness: 1, side: THREE.BackSide });
       sph(0.57, '#232842', 0, 0.06, -0.12, 1, 0.94, 0.86, { roughness: 1 });
@@ -877,11 +1123,11 @@ function makeBot(def, i) {
   const c = def.color, look = LOOKS[def.id] || {};
   const skin = new THREE.MeshStandardMaterial({ color: look.head || c, roughness: 0.92, metalness: 0 });
   const dark = new THREE.MeshStandardMaterial({ color: new THREE.Color(c).multiplyScalar(0.62), roughness: 0.92, metalness: 0 });
-  const bot = { def, i, root, loc: 'lounge', path: [], onArrive: null, want: 'idle', info: null, handled: null, seat: SEATS[i], desk: DESKS[def.id], lane: (i - 4) * 0.24 };
+  const bot = { def, i, root, loc: 'lounge', path: [], onArrive: null, floor: 0, placed: false, spot: null, nextSpot: null, claim: null, want: 'idle', info: null, handled: null, seat: SEATS[i] || SEATS[SEATS.length - 1], desk: DESKS[def.id], lane: (i - 4) * 0.24 };
   let model, mixer = null, acts = {}, bones = {};
   let put = null, putT = null;
   if (charGltf) {
-    model = SkeletonUtils.clone(charGltf.scene); model.scale.setScalar(charScale);
+    model = SkeletonUtils.clone(charGltf.scene); model.scale.setScalar(charScale * (def.id === 'mini' ? 0.86 : 1));
     model.traverse((o) => { if (o.isMesh) { if (o.name.includes('body')) paintBody(o, look); else o.material = skin; o.castShadow = true; o.receiveShadow = true; } if (o.isBone || o.type === 'Object3D') bones[o.name] = o; });
     mixer = new THREE.AnimationMixer(model);
     for (const n of ['static', 'sit', 'walk', 'holding-both']) { const cl = THREE.AnimationClip.findByName(charGltf.animations, n); if (cl) acts[n] = mixer.clipAction(cl); }
@@ -957,40 +1203,117 @@ function setClip(b, name, paused = true) {
 
 // ---------- routing ----------
 const V = (x, z) => new THREE.Vector3(x, 0, z);
+let peel = 0, peelTarget = 0, camShift = 0; // floor view: 0 office, 1 apartments (see applyPeel)
+const PEEL_T = 1.1;
+const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+// paths are lists of [x, z] walk points (local to the bot's floor) plus { ride, wait } elevator legs (vertical only)
 function seatFront(b) { const [sx, sz, f] = b.seat; return [sx + Math.sin(f) * 0.95, sz + Math.cos(f) * 0.95]; }
+// idle roaming spots (office floor, daytime): coffee-bar stools, break-room table chairs, restroom sinks; lounge seats are per bot
+const STOOLS = [0, 1, 2, 3].map((i) => [14.9 + i * 1.25, 5.25]);
+const BREAK = [0, 1, 2, 3].map((k) => { const a = k * Math.PI / 2 + Math.PI / 4;
+  return { x: 16 + Math.cos(a) * 1.35, z: 9.6 + Math.sin(a) * 1.35, f: -a - Math.PI / 2, out: [16 + Math.cos(a) * 2.1, 9.6 + Math.sin(a) * 2.1] }; });
+const BREAK_VIA = [[[13.4, 12.3], [17.6, 12.3]], [[13.3, 11.2]], [], [[15.6, 7.0]]]; // around the round table from the door
+const BR_PATH = [[7.3, 2.2], [13.05, 2.2], [13.05, 6.5]]; // hall -> walkway past the restroom -> break-room door (z 3, x 12.3..13.8)
+const ROAM = new Set(['lounge', 'coffee', 'break', 'bathroom']);
+const ROAM_CAP = { coffee: STOOLS.length, break: BREAK.length, bathroom: SINKS.length };
+const RIDE_SPEED = 2.0;
+function cabSpot(b) { return [ELEV.cx + ((b.i % 3) - 1) * 0.36, ELEV.cz + ((Math.floor(b.i / 3) % 3) - 1) * 0.48]; }
+function bedPose(b) { const p = BEDS[b.def.id], sc = b.def.id === 'mini' ? 0.86 : 1; // root at the feet, head on the pillow
+  return [p.x, p.headZ + 0.34 + CHAR_H * sc, MATTRESS_TOP + charBack * sc - 0.05]; }
+// from a resting spot out to the corridor lane on that floor (the way in is the same, reversed)
+function legOut(b, loc, spot) {
+  const lz = b.lane;
+  switch (loc) {
+    case 'lounge': { const [fx, fz] = seatFront(b); const pts = [[fx, fz]]; if (fz < 6.8) pts.push([fx, 6.8], [fx < 7.35 ? 4.7 : 10.0, 6.8]); const ex = pts[pts.length - 1][0];
+      pts.push([ex, 10.9], [1.5, 10.9], [1.5, lz]); return pts; }
+    case 'desk': { const [dx, dz] = b.desk; if (b.def.id === 'overlord') return [[-14.0, dz], [-13.9, -3], [-13.9, lz]]; if (b.def.id === 'planner') return [[-16.6, dz], [-16.6, lz]]; return dz < 0 ? [[dx + 1.25, dz], [dx + 1.25, lz]] : [[dx, lz]]; }
+    case 'tray': return [[-13.9, -5.5], [-13.9, -3], [-13.9, lz]];
+    case 'coffee': return [[STOOLS[spot][0], 6.5], ...BR_PATH.slice().reverse(), [7.3, lz]];
+    case 'break': return [BREAK[spot].out, ...BREAK_VIA[spot].slice().reverse(), ...BR_PATH.slice().reverse(), [7.3, lz]];
+    case 'bathroom': return [[SINKS[spot][0], -1.2], [8.7, 0], [7.3, 0], [7.3, lz]];
+    case 'elev': return [[ELEV.landX, ELEV.cz], [ELEV.landX, lz]];
+    case 'bed': { const p = BEDS[b.def.id], [, z] = bedPose(b); return [[p.side, z], [p.side, p.via], [p.door, p.via], [p.door, p.back ? -4.2 : 4.2], [p.door, lz]]; }
+  }
+  return [[1.5, lz]];
+}
+function spotXZ(b, loc, spot) {
+  switch (loc) {
+    case 'lounge': return [b.seat[0], b.seat[1]];
+    case 'desk': return b.desk;
+    case 'tray': return [TRAY[0], TRAY[1] + 0.85];
+    case 'coffee': return STOOLS[spot];
+    case 'break': return [BREAK[spot].x, BREAK[spot].z];
+    case 'bathroom': return SINKS[spot];
+    case 'elev': return cabSpot(b);
+    case 'bed': { const [, z] = bedPose(b); return [BEDS[b.def.id].side, z]; }
+  }
+  return [1.5, 0];
+}
+const legIn = (b, loc, spot) => legOut(b, loc, spot).reverse().concat([spotXZ(b, loc, spot)]);
+const floorOf = (loc) => (loc === 'bed' ? 1 : 0);
 function routeTo(b, dest) {
-  const lz = b.lane, out = [];
-  const exitLounge = () => { const [fx, fz] = seatFront(b); const pts = [[fx, fz]]; if (fz < 6.8) pts.push([fx, 6.8], [fx < 7.35 ? 4.7 : 10.0, 6.8]); const ex = pts[pts.length - 1][0];
-    pts.push([ex, 10.9], [1.5, 10.9], [1.5, lz]); return pts; };
-  const exit = { lounge: exitLounge,
-    desk: () => { const [dx, dz] = b.desk; if (b.def.id === 'overlord') return [[-14.0, dz], [-13.9, -3], [-13.9, lz]]; if (b.def.id === 'planner') return [[-16.6, dz], [-16.6, lz]]; return dz < 0 ? [[dx + 1.25, dz], [dx + 1.25, lz]] : [[dx, lz]]; },
-    tray: () => [[-13.9, -5.5], [-13.9, -3], [-13.9, lz]] };
-  const enter = { lounge: () => exitLounge().reverse().concat([[b.seat[0], b.seat[1]]]),
-    desk: () => { const [dx, dz] = b.desk; if (b.def.id === 'overlord') return [[-13.9, lz], [-13.9, -3], [-14.0, dz], [dx, dz]]; if (b.def.id === 'planner') return [[-16.6, lz], [-16.6, dz], [dx, dz]]; return dz < 0 ? [[dx + 1.25, lz], [dx + 1.25, dz], [dx, dz]] : [[dx, lz], [dx, dz]]; },
-    tray: () => [[-13.9, lz], [-13.9, -3], [-13.9, -5.5], [TRAY[0], TRAY[1] + 0.85]] };
-  out.push(...exit[b.loc](), ...enter[dest]());
-  return out.map(([x, z]) => V(x, z));
+  const out = legOut(b, b.loc, b.spot);
+  if (floorOf(b.loc) !== floorOf(dest)) out.push(...legIn(b, 'elev'), { ride: floorOf(dest) ? AY : 0, wait: 0.6 }, ...legOut(b, 'elev'));
+  out.push(...legIn(b, dest, b.nextSpot));
+  return out;
 }
 // seat cushion offsets (tuned so the sit pose rests on top of the cushion, not inside it)
-const SEAT_FIT = { sofa: { y: 0.62, f: 0.22 }, sofaSmall: { y: 0.55, f: 0.2 }, chair: { y: 0.6, f: 0.16 } };
+const SEAT_FIT = { sofa: { y: 0.62, f: 0.22 }, sofaSmall: { y: 0.55, f: 0.2 }, chair: { y: 0.6, f: 0.16 }, stool: { y: 0.8, f: 0.04 }, dine: { y: 0.42, f: 0.08 } };
 function place(b, where) {
-  b.loc = where; b.path = [];
-  let [x, z] = where === 'lounge' ? b.seat : where === 'desk' ? b.desk : [TRAY[0], TRAY[1] + 0.85];
-  const sitting = where === 'lounge' || (where === 'desk' && b.want === 'working');
-  let y = 0;
-  if (sitting && where === 'lounge') { const fit = SEAT_FIT[b.seat[3] ? 'sofaSmall' : 'sofa']; x += Math.sin(b.seat[2]) * fit.f; z += Math.cos(b.seat[2]) * fit.f; y = fit.y; }
-  else if (sitting) { z += SEAT_FIT.chair.f; y = SEAT_FIT.chair.y; }
-  b.root.position.set(x, y, z);
-  b.root.rotation.y = where === 'lounge' ? b.seat[2] : where === 'tray' ? Math.PI : 0;
-  setClip(b, sitting ? 'sit' : 'static', true);
+  b.loc = where; b.path = []; b.placed = true;
+  b.model.rotation.x = 0;
+  if (where === 'bed') { // lie on the mattress: no lie clip, so tip the standing pose onto its back, frozen
+    if (b.root.parent !== scene) scene.add(b.root); b.floor = 1;
+    const [x, z, y] = bedPose(b); b.root.position.set(x, AY + y, z); b.root.rotation.y = BEDS[b.def.id].facing;
+    b.model.rotation.x = -Math.PI / 2; setClip(b, 'static', true); BEDS[b.def.id].cover.visible = true; return;
+  }
+  if (b.root.parent !== hq) hq.add(b.root); b.floor = 0;
+  let [x, z] = spotXZ(b, where, b.spot), y = 0, ry = 0, sit = false;
+  if (where === 'lounge') { const fit = SEAT_FIT[b.seat[3] ? 'sofaSmall' : 'sofa']; ry = b.seat[2]; x += Math.sin(ry) * fit.f; z += Math.cos(ry) * fit.f; y = fit.y; sit = true; }
+  else if (where === 'desk') { sit = b.want === 'working'; if (sit) { z += SEAT_FIT.chair.f; y = SEAT_FIT.chair.y; } }
+  else if (where === 'tray') ry = Math.PI;
+  else if (where === 'coffee') { ry = Math.PI; z -= SEAT_FIT.stool.f; y = SEAT_FIT.stool.y; sit = true; } // face the counter
+  else if (where === 'break') { ry = BREAK[b.spot].f; x += Math.sin(ry) * SEAT_FIT.dine.f; z += Math.cos(ry) * SEAT_FIT.dine.f; y = SEAT_FIT.dine.y; sit = true; }
+  else if (where === 'bathroom') ry = Math.PI; // at the sink, facing the mirror
+  b.root.position.set(x, y, z); b.root.rotation.y = ry;
+  setClip(b, sit ? 'sit' : 'static', true);
 }
-function go(b, dest, onArrive) {
-  if (b.loc === dest && !b.path.length) { onArrive && onArrive(); return; }
-  b.path = routeTo(b, dest); b.dest = dest; b.onArrive = onArrive; b.root.position.y = 0;
-  setClip(b, b.paper.visible ? 'walk' : 'walk', false);
+function go(b, dest, onArrive, spot = null) {
+  if (b.loc === dest && !b.path.length && (spot === null || spot === b.spot)) { onArrive && onArrive(); return; }
+  b.nextSpot = spot; b.claim = spot === null ? null : dest + ':' + spot;
+  b.model.rotation.x = 0; b.root.position.y = b.floor ? AY : 0; BEDS[b.def.id].cover.visible = false;
+  b.path = routeTo(b, dest); b.dest = dest; b.onArrive = onArrive;
+  setClip(b, 'walk', false);
+}
+function freeSpots(b, k) { const out = []; for (let i = 0; i < ROAM_CAP[k]; i++) if (!bots.some((o) => o !== b && o.claim === k + ':' + i)) out.push(i); return out; }
+const dwellFor = (k) => (k === 'bathroom' ? rand(8000, 14000) : rand(10000, 25000));
+function roam(b, now, mustMove) { // idle: lounge, coffee bar, break-room table or restroom; often stays put
+  if (!mustMove && b.loc !== 'bathroom' && Math.random() < 0.5) { b.roamAt = now + dwellFor(b.loc); return; }
+  const opts = []; let tot = 0;
+  for (const [k, w] of [['lounge', 4], ['coffee', 2.2], ['break', 2], ['bathroom', 1]]) {
+    if (k === b.loc) continue;
+    const free = k === 'lounge' ? [null] : freeSpots(b, k); if (free.length) { opts.push([k, w, free]); tot += w; }
+  }
+  if (!opts.length) { b.roamAt = now + dwellFor(b.loc); return; }
+  let r = Math.random() * tot, pick = opts[0]; for (const o of opts) { if ((r -= o[1]) <= 0) { pick = o; break; } }
+  const [k, , free] = pick, spot = free[Math.floor(Math.random() * free.length)];
+  b.roamAt = Infinity;
+  go(b, k, () => { b.roamAt = performance.now() + dwellFor(k); }, spot);
+}
+// overnight: 2:00-7:00 AM Arizona time every bot sleeps in its own apartment (status chips stay real)
+let sleepNow = null, sleepForce = QS.get('sleep') === '1' ? true : QS.get('sleep') === '0' ? false : null;
+function azHour24() { return Number(fmtAZ(new Date(), { hour: 'numeric', hourCycle: 'h23' })) % 24; }
+function checkSleep() {
+  const h = azHour24(), s = sleepForce !== null ? sleepForce : h >= 2 && h < 7;
+  if (s === sleepNow) return; const first = sleepNow === null; sleepNow = s;
+  if (!first) { const now = performance.now(); bots.forEach((b, i) => { b.holdUntil = now + i * 900 + rand(0, 900); }); } // stagger the elevator line
 }
 function decide(b) {
-  if (b.path.length) return;
+  if (b.path.length || !b.placed) return;
+  const now = performance.now();
+  if (b.holdUntil && now < b.holdUntil) return;
+  if (sleepNow) { if (b.loc !== 'bed') go(b, 'bed'); return; }
   const s = b.want;
   if (s === 'working' || s === 'waiting' || s === 'error') {
     if (b.loc !== 'desk') go(b, 'desk');
@@ -1002,8 +1325,9 @@ function decide(b) {
     go(b, 'tray', () => { b.paper.visible = false; dropPaper(); b.pauseUntil = performance.now() + 700; });
     return;
   }
-  if (b.pauseUntil && performance.now() < b.pauseUntil) return;
-  if (b.loc !== 'lounge') go(b, 'lounge');
+  if (b.pauseUntil && now < b.pauseUntil) return;
+  if (!ROAM.has(b.loc)) roam(b, now, true);
+  else if (now >= (b.roamAt || 0)) roam(b, now, false);
 }
 const PAPER_GEO = new THREE.BoxGeometry(0.26, 0.008, 0.32);
 function dropPaper() {
@@ -1012,21 +1336,42 @@ function dropPaper() {
   trayPapers.add(p); if (trayPapers.children.length > 8) trayPapers.remove(trayPapers.children[0]);
 }
 const SPEED = 2.4;
-const STEP_V = new THREE.Vector3();
+function turnTo(b, ang, dt) { let da = ang - b.root.rotation.y; da = Math.atan2(Math.sin(da), Math.cos(da)); b.root.rotation.y += da * Math.min(1, dt * 12); }
 function step(b, dt) {
   if (b.path.length) {
-    const target = b.path[0], pos = b.root.position;
-    const d = STEP_V.copy(target).sub(pos); d.y = 0; const dist = d.length();
-    if (dist < 0.02) b.path.shift();
-    else {
-      pos.addScaledVector(d.normalize(), Math.min(dist, SPEED * dt));
-      const ang = Math.atan2(d.x, d.z); let da = ang - b.root.rotation.y; da = Math.atan2(Math.sin(da), Math.cos(da));
-      b.root.rotation.y += da * Math.min(1, dt * 12);
-      if (b.mixer) b.mixer.update(dt);
+    const t = b.path[0], pos = b.root.position;
+    if (Array.isArray(t)) {
+      const dx = t[0] - pos.x, dz = t[1] - pos.z, dist = Math.hypot(dx, dz);
+      if (dist < 0.02) b.path.shift();
+      else {
+        if (b.clip !== 'walk') setClip(b, 'walk', false);
+        const k = Math.min(dist, SPEED * dt) / dist; pos.x += dx * k; pos.z += dz * k;
+        turnTo(b, Math.atan2(dx, dz), dt);
+        if (b.mixer) b.mixer.update(dt);
+      }
+    } else { // elevator: wait for the doors, then ride straight up/down the shaft
+      if (b.clip !== 'static') setClip(b, 'static', true);
+      turnTo(b, Math.PI / 2, dt); // face the doors
+      if (t.wait > 0) t.wait -= dt;
+      else {
+        if (b.root.parent !== scene) scene.add(b.root);
+        const dy = t.ride - pos.y;
+        if (Math.abs(dy) < 1e-3) { pos.y = t.ride; b.path.shift(); b.floor = floorOf(t.ride < AY / 2 ? 'bed' : 'desk'); if (!b.floor) hq.add(b.root); }
+        else pos.y += Math.sign(dy) * Math.min(Math.abs(dy), RIDE_SPEED * dt);
+      }
     }
-    if (!b.path.length) { b.loc = b.dest; place(b, b.loc); const cb = b.onArrive; b.onArrive = null; cb && cb(); }
+    if (!b.path.length) { b.loc = b.dest; b.spot = b.nextSpot; place(b, b.loc); const cb = b.onArrive; b.onArrive = null; cb && cb(); }
   }
   decide(b);
+}
+function tickDoors(dt) { // elevator doors slide open while someone is at the doorway on that floor
+  for (const [el, fy] of [[officeElev, 0], [aptElev, AY]]) {
+    let want = 0;
+    for (const b of bots) { const p = b.root.position; if (Math.abs(p.y - fy) < 0.3 && Math.hypot(p.x - ELEV.doorX, p.z - ELEV.cz) < 1.75) { want = 1; break; } }
+    if (el.open === want) continue;
+    el.open = want > el.open ? Math.min(1, el.open + dt * 2.2) : Math.max(0, el.open - dt * 2.2);
+    for (const l of el.leaves) l.m.position.z = ELEV.cz + l.s * (0.28 + el.open * 0.5);
+  }
 }
 
 // ---------- side panel (real data only) ----------
@@ -1072,7 +1417,8 @@ function applyStates(src, isSim) {
     const scr = deskScreens[b.def.id]; if (scr) scr.material.color.set(eff === 'working' ? '#9fd4ff' : eff === 'error' ? '#ff8a7a' : eff === 'waiting' ? '#ffd27a' : '#2a3a4c').multiplyScalar(eff === 'idle' || eff === 'done' ? 1 : 1.6);
     if (firstLoad && !isSim) {
       if (eff === 'done') b.handled = b.doneKey;
-      place(b, ['working', 'waiting', 'error'].includes(eff) ? 'desk' : 'lounge');
+      place(b, sleepNow ? 'bed' : ['working', 'waiting', 'error'].includes(eff) ? 'desk' : 'lounge'); // 2-7 AM AZ: already in bed
+      b.roamAt = performance.now() + 4000 + b.i * 3000 + rand(0, 5000); // stagger the first wander
     }
   }
   renderPanel(src, isSim);
@@ -1107,6 +1453,7 @@ async function poll() {
     pollTimer = setTimeout(poll, ok ? 15000 : 5000);
   }
 }
+checkSleep();
 poll();
 addEventListener('online', () => poll());
 document.addEventListener('visibilitychange', () => { if (!document.hidden) poll(); });
@@ -1147,23 +1494,27 @@ if (QS.get('simulate') === '1') startSim();
 // ---------- tap/hover on bots ----------
 const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
 let downAt = null, hovered = null;
-function pick(e) {
+function pick(e) { // -> { bot } for a bot on the floor in view, { elev: true } for the elevator in view, or {}
   const r = renderer.domElement.getBoundingClientRect();
   ptr.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1); ray.setFromCamera(ptr, camera);
-  const hit = ray.intersectObjects(bots.map((b) => b.root), true)[0]; return hit && hit.object.userData.bot;
+  const hit = ray.intersectObjects(bots.filter((b) => b.tag.visible).map((b) => b.root), true)[0];
+  if (hit) return { bot: hit.object.userData.bot };
+  if (peel === peelTarget && ray.intersectObject((peelTarget ? aptElev : officeElev).grp, true).length) return { elev: true };
+  return {};
 }
 renderer.domElement.addEventListener('pointerdown', (e) => { downAt = [e.clientX, e.clientY]; });
 renderer.domElement.addEventListener('pointerup', (e) => {
   if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 6) return;
-  const b = pick(e);
+  const p = pick(e), b = p.bot;
+  if (p.elev) { setView(!peelTarget); return; } // the elevator works like the floor arrow
   for (const o of bots) if (o !== b) { o.el.dataset.pinned = ''; o.el.classList.remove('open'); }
   if (b) { b.el.dataset.pinned = b.el.dataset.pinned ? '' : '1'; b.el.classList.toggle('open', !!b.el.dataset.pinned); }
 });
 renderer.domElement.addEventListener('pointermove', (e) => {
   if (e.pointerType !== 'mouse') return;
-  const b = pick(e);
+  const p = pick(e), b = p.bot;
   if (hovered && hovered !== b && !hovered.el.dataset.pinned) hovered.el.classList.remove('open');
-  if (b) b.el.classList.add('open'); hovered = b; renderer.domElement.style.cursor = b ? 'pointer' : '';
+  if (b) b.el.classList.add('open'); hovered = b; renderer.domElement.style.cursor = b || p.elev ? 'pointer' : '';
 });
 
 // ---------- time of day ----------
@@ -1176,16 +1527,19 @@ let todMode = 'now';
 function azHour() { return Number(fmtAZ(new Date(), { hour: 'numeric', hour12: false })) % 24; }
 function resolveTod() { if (todMode !== 'now') return todMode; const h = azHour(); return h >= 6 && h < 17 ? 'day' : h >= 17 && h < 20 ? 'evening' : 'night'; }
 let todApplied = null;
+function lampLevels() { const k = TOD[todApplied || 'day'].lamp, e = ease(peel);
+  for (const l of lamps) l.p.intensity = l.base * k * (1 - e);
+  for (const l of aptLights) l.p.intensity = l.base * Math.max(0.55, k) * e; }
 function applyTod(force) {
   const m = resolveTod(); if (m === todApplied && !force) return; todApplied = m; const s = TOD[m];
   hemi.color.set(s.hemi[0]); hemi.groundColor.set(s.hemi[1]); hemi.intensity = s.hemi[2];
   sun.color.set(s.sun[0]); sun.intensity = s.sun[1]; sun.position.set(...s.sunPos); sun.target.position.set(0, 0, 0);
   renderer.toneMappingExposure = s.exp;
-  for (const l of lamps) l.p.intensity = l.base * s.lamp;
+  lampLevels();
   for (const g of glowMats) g.m.color.copy(g.base).multiplyScalar(1.7 * s.glow);
   drawSky(m); drawBossWindows(m);
   const fz = { day: ['#b4c6dc', 0.45, '#7d8fa6', 0.1], evening: ['#8a86a8', 0.95, '#1a1e36', 0.5], night: ['#5a6478', 1.15, '#0f1522', 0.7] }[m];
-  for (const f of [facadeX, facadeZ]) { f.color.set(fz[0]); f.emissiveIntensity = fz[1]; }
+  for (const f of [facadeX, facadeZ, ...skinMats]) { f.color.set(fz[0]); f.emissiveIntensity = fz[1]; }
   for (const k of skyline) { k.color.set(fz[2]); k.emissiveIntensity = fz[3]; }
   drawSkyBack(m); const hor = SKY_BACK[m][2]; scene.fog.color.set(hor); BG.set(SKY_BACK[m][0]);
   groundMat.color.set({ day: '#ffffff', evening: '#a49aa8', night: '#5d6680' }[m]); groundMat.emissiveIntensity = { day: 0.15, evening: 0.9, night: 1.3 }[m];
@@ -1218,6 +1572,40 @@ function adapt(dt) {
 }
 
 // ---------- camera framing (fixed isometric, fit the room) ----------
+// ---------- floor view: the office layer peels back (hinged at the back wall, then lifts away) to show the apartments ----------
+const floorBtn = document.getElementById('floorbtn');
+function syncFloorBtn() {
+  const a = peelTarget === 1; floorBtn.classList.toggle('up', a);
+  floorBtn.querySelector('span').textContent = a ? 'Office' : 'Apartments';
+  floorBtn.setAttribute('aria-label', a ? 'Show office' : 'Show apartments'); floorBtn.title = a ? 'Show office (back up)' : 'Show apartments (floor below)';
+}
+function setView(aptView) { peelTarget = aptView ? 1 : 0; syncFloorBtn(); }
+function applyPeel() {
+  const e = ease(peel);
+  hqPivot.rotation.x = -1.2 * ease(Math.min(1, peel * 1.35)); // fold up from the front edge, hinged at the back wall
+  hqPivot.position.set(e * 4, e * e * 46, -14.3 - e * 4); // then lift up and away, fully off screen before it hides
+  hq.visible = peel < 1; apt.visible = peel > 0; // only the floor(s) in view are drawn
+  const so = 1 - smooth(0.02, 0.4, peel);
+  for (const m of skinMats) { const tr = so < 1; if (m.transparent !== tr) { m.transparent = tr; m.needsUpdate = true; } m.opacity = so; }
+  for (const k of skins) k.visible = so > 0.001;
+  const shift = -FLOOR_H * e, d = shift - camShift; camShift = shift; camera.position.y += d; controls.target.y += d;
+  lampLevels();
+}
+function tickPeel(dt) {
+  if (peel === peelTarget) return;
+  peel = peelTarget > peel ? Math.min(peelTarget, peel + dt / PEEL_T) : Math.max(peelTarget, peel - dt / PEEL_T);
+  applyPeel();
+}
+function syncFloors() { // tags + bots only on the floor in view (tags hide while the floor is moving)
+  const settled = peel === peelTarget, showApt = peelTarget === 1;
+  for (const b of bots) {
+    const up = b.root.parent === hq || b.root.position.y > AY / 2;
+    if (b.root.parent === scene) b.root.visible = up ? hq.visible : apt.visible;
+    const v = settled && (up ? !showApt : showApt); if (b.tag.visible !== v) b.tag.visible = v;
+  }
+}
+floorBtn.addEventListener('click', (e) => { e.stopPropagation(); setView(!peelTarget); floorBtn.blur(); });
+syncFloorBtn();
 const ROOM_PTS = []; for (const x of [-20.3, 20.3]) for (const z of [-14.3, 14.3]) for (const y of [-0.7, WH + 0.1]) ROOM_PTS.push(V(x, z).setY(y));
 function frameCamera() {
   const wide = innerWidth > 900;
@@ -1225,10 +1613,10 @@ function frameCamera() {
   const panelW = wide && panel && panel.offsetWidth > 0 ? panel.offsetWidth + 24 : 0;
   const top = fs ? 40 : wide ? 64 : 70, bottom = fs ? 16 : wide ? 70 : 150;
   const availW = innerWidth - panelW - (wide ? 40 : 12), availH = innerHeight - top - bottom;
-  const tgt = V(0, 0).setY(1.0);
+  const tgt = V(0, 0).setY(1.0 + camShift);
   camera.position.copy(tgt).addScaledVector(ISO_DIR, 120); camera.up.set(0, 1, 0); camera.lookAt(tgt); camera.updateMatrixWorld();
   const inv = camera.matrixWorldInverse; let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
-  for (const p of ROOM_PTS) { const q = p.clone().applyMatrix4(inv); x0 = Math.min(x0, q.x); x1 = Math.max(x1, q.x); y0 = Math.min(y0, q.y); y1 = Math.max(y1, q.y); }
+  for (const p of ROOM_PTS) { const q = p.clone(); q.y += camShift; q.applyMatrix4(inv); x0 = Math.min(x0, q.x); x1 = Math.max(x1, q.x); y0 = Math.min(y0, q.y); y1 = Math.max(y1, q.y); }
   const cw = x1 - x0, ch = y1 - y0;
   const s = innerWidth < innerHeight ? cw / availW : Math.max(cw / availW, ch / availH); // world units per px (portrait: fill width)
   const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
@@ -1239,6 +1627,7 @@ function frameCamera() {
   camera.updateProjectionMatrix(); controls.target.copy(tgt); controls.update();
 }
 frameCamera();
+if (QS.get('floor') === 'apt') { setView(true); peel = 1; applyPeel(); }
 function resize() {
   renderer.setPixelRatio(window.devicePixelRatio); renderer.setSize(innerWidth, innerHeight); labels.setSize(innerWidth, innerHeight);
   composer.setPixelRatio(window.devicePixelRatio); composer.setSize(innerWidth, innerHeight); frameCamera();
@@ -1275,11 +1664,13 @@ renderer.domElement.addEventListener('webglcontextrestored', () => location.relo
 
 // ---------- loop ----------
 const clock = new THREE.Clock();
-let scrAcc = 0, ledAcc = 0;
+let scrAcc = 0, ledAcc = 0, sleepAcc = 0;
 function loop() {
   const dt = Math.min(1.0, clock.getDelta()), t = clock.elapsedTime, now = performance.now();
   tickSim(now);
+  sleepAcc += dt; if (sleepAcc > 20) { sleepAcc = 0; checkSleep(); } // a tab left open overnight follows the AZ clock
   for (let left = dt; left > 1e-4; left -= 0.04) { const d = Math.min(0.04, left); for (const b of bots) step(b, d); }
+  tickDoors(dt); tickPeel(dt); syncFloors();
   scrAcc += dt; if (scrAcc > 0.12) { scrAcc = 0; for (const s of screens) { const { g, c } = s.tex.userData; s.draw(g, c.width, c.height, t); s.tex.needsUpdate = true; } }
   ledAcc += dt; if (ledAcc > 0.25) { ledAcc = 0; for (const l of leds) if (Math.random() < 0.25) { const m = l.led.material; m.color.equals(l.on) ? m.color.setRGB(0.05, 0.06, 0.07) : m.color.copy(l.on); } }
   brew.material.emissiveIntensity = Math.sin(t * 2) > 0 ? 1.4 : 0.3;
@@ -1291,5 +1682,6 @@ function loop() {
 }
 loop();
 const PROJ_V = new THREE.Vector3();
-window.__hq = { bots, live: () => live, fx, toggleFs, onFsChange, camera, controls, place,
+window.__hq = { bots, live: () => live, fx, toggleFs, onFsChange, camera, controls, place, setView, BEDS, charBack: () => charBack,
+  sleep: (v) => { sleepForce = v; checkSleep(); }, view: () => ({ peel, peelTarget }), peelTo: (p) => { peel = peelTarget = p; applyPeel(); }, // screenshot helpers only
   project: (x, y, z) => { PROJ_V.set(x, y, z).project(camera); return [(PROJ_V.x + 1) / 2 * innerWidth, (1 - PROJ_V.y) / 2 * innerHeight]; } };

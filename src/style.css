@@ -83,6 +83,16 @@ body.fs #activity time{width:auto}
 body.fs #activity li>div{overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 body.fs.idle #fsbtn{opacity:0}
 body.fs.idle,body.fs.idle canvas{cursor:none!important}
+/* floor arrow: peel the office back to the apartments below (and back up) */
+#floorbtn{position:fixed;left:16px;bottom:calc(max(12px,env(safe-area-inset-bottom)) + 52px);z-index:10;display:flex;align-items:center;gap:7px;height:38px;padding:0 15px 0 6px;
+  pointer-events:auto;cursor:pointer;font:650 12.5px system-ui,sans-serif;letter-spacing:.2px;color:#e6e9f0;background:rgba(16,21,34,.92);border:1px solid rgba(255,255,255,.1);
+  border-radius:999px;box-shadow:0 6px 20px rgba(0,0,0,.35);transition:background .15s,color .15s,opacity .4s}
+#floorbtn svg{width:26px;height:26px;padding:4px;border-radius:50%;background:#f2f4f8;color:#141824;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;transition:transform .5s cubic-bezier(.6,0,.3,1)}
+#floorbtn.up svg{transform:rotate(180deg)}
+#floorbtn:hover{background:rgba(28,35,52,.96);color:#fff}
+#floorbtn:focus-visible{outline:2px solid #7c83ff;outline-offset:2px}
+body.fs #floorbtn{bottom:16px}
+body.fs.idle #floorbtn{opacity:0}
 @media (max-width:900px){
   #panel{display:none}
   #legend{display:none}
