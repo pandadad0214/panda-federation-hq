@@ -1,36 +1,37 @@
 # Panda Federation H.Q.
 
-Live 3D headquarters for the Panda Federation bot team — a cut-away office tower with status chips, apartments one floor down, and a day/night Arizona clock.
+Panda Federation H.Q. is a live 3D office where each bot on the Panda Federation team shows up as a character with a real-time status chip. It is a Vite + Three.js scene served by a Cloudflare Worker, with a day/night clock and an apartment floor one level down.
 
-## Use
+## How to use this
 
-Open the live office: **https://panda-federation-hq.pandafederation.workers.dev**
-
-(Password-gated. Bot status and usage update from the team; visitors browse the scene.)
-
-## Local run
+Open the live office: **https://panda-federation-hq.pandafederation.workers.dev** (password-gated; visitors browse the scene, bots post status). To run your own copy:
 
 ```bash
-npm install
-npm run dev
+git clone https://github.com/pandadad0214/panda-federation-hq.git && cd panda-federation-hq
+npm install && npm run dev   # Vite build + Wrangler on http://127.0.0.1:8787
 ```
 
-That builds the Vite front end and starts Wrangler on http://127.0.0.1:8787 (`--test-scheduled --port 8787`).
-
-Create a gitignored `.dev.vars` next to `wrangler.toml` with dummy values for local secrets (names only — never commit real values):
-
-```
-SITE_PASSWORD=dev-password
-STATUS_TOKEN=dev-token
-```
-
-Trigger the cron heartbeat locally:
-
-```bash
-curl "http://127.0.0.1:8787/__scheduled?cron=*/5+*+*+*+*"
-```
+1. **Clone and install** with the commands above (Node.js and npm).
+2. **Add local secrets** in a gitignored `.dev.vars` next to `wrangler.toml` (dummy values only):
+   ```
+   SITE_PASSWORD=dev-password
+   STATUS_TOKEN=dev-token
+   ```
+3. **Post a status** and watch a chip change: `curl -X POST -H "Authorization: Bearer dev-token" -d '{"bot":"scribe","state":"working","text":"demo"}' http://127.0.0.1:8787/api/status`. Trigger the cron heartbeat with `curl "http://127.0.0.1:8787/__scheduled?cron=*/5+*+*+*+*"`.
 
 Production secrets are set with `wrangler secret put` (see `wrangler.toml`); they are never stored in this repo.
+
+## For AI agents
+
+| Field | Value |
+| --- | --- |
+| Purpose | Status dashboard rendered as a 3D office: bots POST their state, visitors see chips, a feed-health warning and usage. |
+| Use when | A bot team wants a visual, glanceable status board it can update with one HTTP call. |
+| Do not use when | You need alerting, logs or metrics storage; status text is capped at 80 chars and rejects emails, phone numbers and long digit runs. |
+| Install | `git clone` + `npm install && npm run dev` (Cloudflare Wrangler) |
+| API | `POST /api/status` (Bearer `STATUS_TOKEN`, `{bot, state, text}`), `POST /api/usage`, `GET /api/state` (session), `/login`, `/logout` |
+| States | `working`, `waiting`, `error`, `done`, `idle` |
+| Side effects | Writes to a Durable Object; no third-party calls. Not published to npm. |
 
 ## For developers
 
