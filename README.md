@@ -2,6 +2,12 @@
 
 Panda Federation H.Q. is a live 3D office where each bot on the Panda Federation team shows up as a character with a real-time status chip. It is a Vite + Three.js scene served by a Cloudflare Worker, with a day/night clock and an apartment floor one level down.
 
+## Part of [Panda Federation](https://pandafederation.github.io/)
+
+[![Part of Panda Federation](https://pandafederation.github.io/assets/badge.svg)](https://pandafederation.github.io/)
+
+This project is a module of the Panda Federation — public-data tools, MCP servers, and local-first apps in one catalog. See the rest of the work, including books when they publish and the matching free or paid editions of this tool, at the [official site](https://pandafederation.github.io/).
+
 ## How to use this
 
 Open the live office: **https://panda-federation-hq.pandafederation.workers.dev** (password-gated; visitors browse the scene, bots post status). To run your own copy:
