@@ -1,0 +1,12 @@
+# Panda Federation H.Q.
+
+> A live 3D office where each bot on the Panda Federation team appears as a character with a real-time status chip. Vite + Three.js, served by a Cloudflare Worker.
+
+- Live office (password-gated for visitors): https://panda-federation-hq.pandafederation.workers.dev/
+- Source: https://github.com/pandadad0214/panda-federation-hq
+- Official catalog: https://pandafederation.com/
+- DevHunt: https://devhunt.org/tool/panda-federation-hq
+
+Bots post status with `POST /api/status` (Bearer token, `{bot, state, text}`). This file does not include credentials or live bot state.
+
+This host exposes read-only WebMCP tools on the public sign-in page and inside the office: get_hq_overview, get_links, list_apps, list_servers. Catalog: https://panda-federation-hq.pandafederation.workers.dev/webmcp-catalog.json

@@ -8,6 +8,14 @@ const STALE_MS = 10 * 60 * 1000;          // working/done -> idle after 10 min w
 const QUIET_WARN_MS = 45 * 60 * 1000;     // feed "quiet" warning threshold
 const SESSION_DAYS = 30;
 const COOKIE = 'hq_session';
+// Public, read-only discovery files (WebMCP / llms.txt). No session required.
+const PUBLIC_FILES = new Set([
+  '/llms.txt',
+  '/webmcp-catalog.json',
+  '/webmcp.json',
+  '/.well-known/webmcp.json',
+  '/panda-webmcp.js',
+]);
 
 const enc = new TextEncoder();
 const b64url = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
@@ -66,7 +74,11 @@ function cleanText(raw) {
 
 function loginPage(msg = '') {
   return new Response(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Panda Federation H.Q. — Sign in</title><style>
+<title>Panda Federation H.Q. — Sign in</title>
+<!-- Chrome WebMCP origin-trial token for this origin. Expires 2027-03-29. -->
+<meta http-equiv="origin-trial" content="An4qAMODWOSkX6xg7r6VFMfQuP72U148Cmkp8oDvFhudhjXcIdDNBU84oeZNQEZRWN5idosaDKUVIRzVtRt6KQsAAABveyJvcmlnaW4iOiJodHRwczovL3BhbmRhLWZlZGVyYXRpb24taHEucGFuZGFmZWRlcmF0aW9uLndvcmtlcnMuZGV2OjQ0MyIsImZlYXR1cmUiOiJXZWJNQ1AiLCJleHBpcnkiOjE4MDYzNjQ4MDB9">
+<link rel="alternate" type="text/plain" href="/llms.txt" title="llms.txt">
+<style>
 *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#1d2126;color:#e7e3da;font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
 form{width:min(340px,90vw);background:#262b31;border:1px solid #39404a;border-radius:14px;padding:28px 24px;text-align:center}
 img{width:96px;height:96px;border-radius:50%;object-fit:cover;border:2px solid #39404a}
@@ -76,7 +88,9 @@ button{margin-top:12px;width:100%;padding:12px;border:0;border-radius:9px;backgr
 .err{color:#e58a7e;margin-top:10px;font-size:14px;min-height:1em}</style></head><body>
 <form method="post" action="/login"><img src="/login-crest.jpg" alt=""><h1>Panda Federation H.Q.</h1><p>Members only</p>
 <input type="password" name="password" placeholder="Password" autocomplete="current-password" autofocus required>
-<button type="submit">Enter</button><div class="err">${msg}</div></form></body></html>`,
+<button type="submit">Enter</button><div class="err">${msg}</div></form>
+<script src="/panda-webmcp.js" defer data-webmcp-catalog="/webmcp-catalog.json" data-webmcp-scope="hq"></script>
+</body></html>`,
   { status: msg ? 401 : 200, headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store', ...SEC_HEADERS } });
 }
 
@@ -111,6 +125,13 @@ export default {
 
     // --- login / logout (public) ---
     if (p === '/login-crest.jpg') return env.ASSETS.fetch(new Request(new URL('/crest-samurai.jpg', url), req));
+    if ((req.method === 'GET' || req.method === 'HEAD') && PUBLIC_FILES.has(p)) {
+      const res = await env.ASSETS.fetch(req);
+      const out = new Response(res.body, res);
+      out.headers.set('cache-control', 'public, max-age=300');
+      for (const [k, v] of Object.entries(SEC_HEADERS)) out.headers.set(k, v);
+      return out;
+    }
     if (p === '/login') {
       if (req.method === 'POST') {
         const form = await req.formData().catch(() => null);

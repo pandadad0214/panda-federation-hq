@@ -1,0 +1,19 @@
+{
+  "version": "1",
+  "name": "Panda Federation H.Q.",
+  "description": "Live 3D office with real-time status chips for the Panda Federation team.",
+  "url": "https://panda-federation-hq.pandafederation.workers.dev/",
+  "spec": "https://webmachinelearning.github.io/webmcp/",
+  "catalog": "https://panda-federation-hq.pandafederation.workers.dev/webmcp-catalog.json",
+  "llms_txt": "https://panda-federation-hq.pandafederation.workers.dev/llms.txt",
+  "tools": [
+    "get_hq_overview",
+    "get_links",
+    "list_apps",
+    "list_servers"
+  ],
+  "registration": "document.modelContext.registerTool",
+  "annotations": {
+    "readOnlyHint": true
+  }
+}

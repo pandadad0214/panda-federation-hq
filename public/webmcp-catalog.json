@@ -1,0 +1,295 @@
+{
+  "version": "2026-11-10",
+  "generated_at": "2026-11-10T10:36:00-07:00",
+  "source": "Panda Federation H.Q. public catalog. Counts match the official site catalog.",
+  "site": {
+    "name": "Panda Federation H.Q.",
+    "description": "A live 3D office where each bot on the Panda Federation team appears as a character with a real-time status chip.",
+    "url": "https://panda-federation-hq.pandafederation.workers.dev/",
+    "links": {
+      "github": "https://github.com/pandadad0214/panda-federation-hq",
+      "official_site": "https://pandafederation.com/",
+      "tools_docs": "https://pandadad0214.github.io/panda-federation-tools/",
+      "apify": "https://apify.com/pandadad0214",
+      "product_hunt": "https://www.producthunt.com/products/panda-federation-tools",
+      "x": "https://x.com/Pandadad0214",
+      "devhunt": "https://devhunt.org/tool/panda-federation-hq",
+      "alternativeto": "https://alternativeto.net/software/panda-federation-h-q",
+      "llms_txt": "https://panda-federation-hq.pandafederation.workers.dev/llms.txt",
+      "catalog": "https://panda-federation-hq.pandafederation.workers.dev/webmcp-catalog.json"
+    }
+  },
+  "overview": {
+    "name": "Panda Federation H.Q.",
+    "summary": "A live 3D office where each bot on the Panda Federation team appears as a character with a real-time status chip. Visitors browse the scene; bots post status with a bearer token. The office has a day/night clock and an apartment floor one level down.",
+    "url": "https://panda-federation-hq.pandafederation.workers.dev/",
+    "repo": "https://github.com/pandadad0214/panda-federation-hq",
+    "official_site": "https://pandafederation.com/",
+    "access": "The office is password-gated for visitors. Status updates use POST /api/status with a bearer token. This overview does not include credentials or live bot state.",
+    "stack": "Vite, Three.js, Cloudflare Worker, Durable Object",
+    "listings": {
+      "devhunt": "https://devhunt.org/tool/panda-federation-hq",
+      "alternativeto": "https://alternativeto.net/software/panda-federation-h-q"
+    }
+  },
+  "servers": [
+    {
+      "id": "panda-research-tools",
+      "name": "Panda Research Tools",
+      "tool_count": 8,
+      "description": "8 research-integrity tools: citation checks, OpenAlex and literature search, PubMed evidence tables, experts, PDF tables, Wayback snapshots and topic trends.",
+      "repo": "https://github.com/pandadad0214/panda-research-tools",
+      "homepage": "https://pandadad0214.github.io/panda-federation-tools/",
+      "pypi": "https://pypi.org/project/panda-research-tools/",
+      "pypi_version": "0.2.0",
+      "registry": "https://registry.modelcontextprotocol.io/v0/servers?search=io.github.pandadad0214/panda-research-tools",
+      "listings": {
+        "glama": "https://glama.ai/mcp/servers/pandadad0214/panda-research-tools",
+        "mcprepository": "https://mcprepository.com/pandadad0214/panda-research-tools"
+      },
+      "install": {
+        "uvx": "uvx --from panda-federation-tools panda-research-tools",
+        "args": [
+          "--from",
+          "panda-federation-tools",
+          "panda-research-tools"
+        ],
+        "requires": [
+          "APIFY_TOKEN"
+        ]
+      },
+      "related": [],
+      "tools": []
+    },
+    {
+      "id": "panda-public-funding-tools",
+      "name": "Panda Public Funding Tools",
+      "tool_count": 10,
+      "description": "10 public-funding tools: grants, contracts, SAM.gov bids, SBIR/STTR, SEC financials, clinical trials, Federal Register, recalls, VIN decode and EU tenders.",
+      "repo": "https://github.com/pandadad0214/panda-public-funding-tools",
+      "homepage": "https://pandadad0214.github.io/panda-federation-tools/",
+      "pypi": "https://pypi.org/project/panda-public-funding-tools/",
+      "pypi_version": "0.2.0",
+      "registry": "https://registry.modelcontextprotocol.io/v0/servers?search=io.github.pandadad0214/panda-public-funding-tools",
+      "listings": {
+        "glama": "https://glama.ai/mcp/servers/pandadad0214/panda-public-funding-tools",
+        "mcprepository": "https://mcprepository.com/pandadad0214/panda-public-funding-tools",
+        "cursor_directory": "https://cursor.directory/plugins/panda-public-funding-tools"
+      },
+      "install": {
+        "uvx": "uvx --from panda-federation-tools panda-public-funding-tools",
+        "args": [
+          "--from",
+          "panda-federation-tools",
+          "panda-public-funding-tools"
+        ],
+        "requires": [
+          "APIFY_TOKEN"
+        ]
+      },
+      "related": [],
+      "tools": []
+    },
+    {
+      "id": "panda-leads-tools",
+      "name": "Panda Leads Tools",
+      "tool_count": 15,
+      "description": "15 public lead tools: NPI, podcasts, local businesses, hiring, enrichment, teams, trucking, IRS nonprofits, building permits, new Florida, Texas, New York and Colorado businesses, H-1B sponsors and French companies.",
+      "repo": "https://github.com/pandadad0214/panda-leads-tools",
+      "homepage": "https://pandadad0214.github.io/panda-federation-tools/",
+      "pypi": "https://pypi.org/project/panda-leads-tools/",
+      "pypi_version": "0.2.0",
+      "registry": "https://registry.modelcontextprotocol.io/v0/servers?search=io.github.pandadad0214/panda-leads-tools",
+      "listings": {
+        "glama": "https://glama.ai/mcp/servers/pandadad0214/panda-leads-tools",
+        "mcprepository": "https://mcprepository.com/pandadad0214/panda-leads-tools"
+      },
+      "install": {
+        "uvx": "uvx --from panda-federation-tools panda-leads-tools",
+        "args": [
+          "--from",
+          "panda-federation-tools",
+          "panda-leads-tools"
+        ],
+        "requires": [
+          "APIFY_TOKEN"
+        ]
+      },
+      "related": [],
+      "tools": []
+    },
+    {
+      "id": "panda-web-security-tools",
+      "name": "Panda Web Security Tools",
+      "tool_count": 7,
+      "description": "7 site and email safety tools: SPF/DKIM/DMARC, AI/SEO audit, hidden-AI scanner, domain WHOIS/expiry, broken links, website change monitor and RSS feed monitor.",
+      "repo": "https://github.com/pandadad0214/panda-web-security-tools",
+      "homepage": "https://pandadad0214.github.io/panda-federation-tools/",
+      "pypi": "https://pypi.org/project/panda-web-security-tools/",
+      "pypi_version": "0.2.0",
+      "registry": "https://registry.modelcontextprotocol.io/v0/servers?search=io.github.pandadad0214/panda-web-security-tools",
+      "listings": {
+        "glama": "https://glama.ai/mcp/servers/pandadad0214/panda-web-security-tools",
+        "mcprepository": "https://mcprepository.com/pandadad0214/panda-web-security-tools"
+      },
+      "install": {
+        "uvx": "uvx --from panda-federation-tools panda-web-security-tools",
+        "args": [
+          "--from",
+          "panda-federation-tools",
+          "panda-web-security-tools"
+        ],
+        "requires": [
+          "APIFY_TOKEN"
+        ]
+      },
+      "related": [],
+      "tools": []
+    },
+    {
+      "id": "panda-federation-tools",
+      "name": "Panda Federation Tools (umbrella)",
+      "tool_count": 40,
+      "description": "Index package for all 40 public-data tools across the four focused servers. Prefer a focused server unless an older config still loads the umbrella.",
+      "repo": "https://github.com/pandadad0214/panda-federation-tools",
+      "homepage": "https://pandadad0214.github.io/panda-federation-tools/",
+      "pypi": "https://pypi.org/project/panda-federation-tools/",
+      "pypi_version": "1.8.0",
+      "registry": "https://registry.modelcontextprotocol.io/v0/servers?search=io.github.pandadad0214",
+      "listings": {
+        "glama": "https://glama.ai/mcp/servers/pandadad0214/panda-federation-tools",
+        "mcprepository": "https://mcprepository.com/pandadad0214/panda-federation-tools"
+      },
+      "install": {
+        "uvx": "uvx panda-federation-tools",
+        "args": [
+          "panda-federation-tools"
+        ],
+        "requires": [
+          "APIFY_TOKEN"
+        ],
+        "notes": "The umbrella lists every tool when PFT_DOMAIN is unset, or one domain when PFT_DOMAIN is research, public-funding, leads or web-security. Prefer a focused server for new installs."
+      },
+      "related": [
+        "panda-research-tools",
+        "panda-public-funding-tools",
+        "panda-leads-tools",
+        "panda-web-security-tools"
+      ],
+      "tools": []
+    },
+    {
+      "id": "quiet-file-team-mcp",
+      "name": "Quiet File Team MCP",
+      "tool_count": 6,
+      "description": "Six free offline MCP tools that explain, configure and check a Quiet File Team. No network calls, no paid APIs, no disk reads of your machine.",
+      "repo": "https://github.com/pandadad0214/quiet-file-team-mcp",
+      "homepage": "https://pandafederation.com/quiet-file-team-mcp/",
+      "pypi": null,
+      "pypi_version": null,
+      "registry": null,
+      "listings": {
+        "glama": "https://glama.ai/mcp/servers/pandadad0214/quiet-file-team-mcp",
+        "mcprepository": "https://mcprepository.com/pandadad0214/quiet-file-team-mcp",
+        "devhunt": "https://devhunt.org/tool/quiet-file-team-mcp"
+      },
+      "install": {
+        "uvx": "uvx --from git+https://github.com/pandadad0214/quiet-file-team-mcp.git@v0.1.0 quiet-file-team-mcp",
+        "args": [
+          "--from",
+          "git+https://github.com/pandadad0214/quiet-file-team-mcp.git@v0.1.0",
+          "quiet-file-team-mcp"
+        ],
+        "requires": [],
+        "notes": "Python 3.11+ and uv. No APIFY_TOKEN. Use with the free Bash core or the paid setup kit."
+      },
+      "related": [],
+      "tools": []
+    }
+  ],
+  "apps": [
+    {
+      "id": "Steel_Panda",
+      "name": "Steel Panda",
+      "description": "Run every shell script in a folder, log each exit code, fail if any task fails. Local Bash, no network.",
+      "repo": "https://github.com/pandadad0214/Steel_Panda",
+      "homepage": null,
+      "listings": {
+        "devhunt": "https://devhunt.org/tool/steel-panda"
+      }
+    },
+    {
+      "id": "Watchdog_Panda",
+      "name": "Watchdog Panda",
+      "description": "Restart a local process when it disappears, with backoff, a restart cap and a failure hook. Bash only.",
+      "repo": "https://github.com/pandadad0214/Watchdog_Panda",
+      "homepage": null,
+      "listings": {
+        "devhunt": "https://devhunt.org/tool/watchdog-panda"
+      }
+    },
+    {
+      "id": "hidden-ai-instructions-watch",
+      "name": "Hidden AI Instructions Watch",
+      "description": "Free scanner and evidence log for web pages that hide text from people but address AI agents.",
+      "repo": "https://github.com/pandadad0214/hidden-ai-instructions-watch",
+      "homepage": null,
+      "listings": {
+        "devhunt": "https://devhunt.org/tool/hidden-ai-instructions-watch"
+      }
+    },
+    {
+      "id": "manual-remake",
+      "name": "Manual Remake",
+      "description": "Rewrite a confusing manual (PDF or photos) into a clear, printable English PDF. A free sample and paid remake editions are both on the Apify Store listing; the free skill is on Agensi.",
+      "repo": "https://github.com/pandadad0214/manual-remake",
+      "homepage": null,
+      "listings": {
+        "devhunt": "https://devhunt.org/tool/manual-remake"
+      }
+    },
+    {
+      "id": "quiet-file-team",
+      "name": "Quiet File Team",
+      "description": "Free Bash kit that lets several AI bots share one computer through files: task queue, pair notes, early exit. A paid setup-kit generator is on the Apify Store and Agensi; a free MCP companion explains and checks a team.",
+      "repo": "https://github.com/pandadad0214/quiet-file-team",
+      "homepage": null,
+      "listings": {}
+    },
+    {
+      "id": "panda-federation-hq",
+      "name": "Panda Federation H.Q.",
+      "description": "Live 3D office where each bot on a team shows a real-time status chip (Three.js + Cloudflare Worker).",
+      "repo": "https://github.com/pandadad0214/panda-federation-hq",
+      "homepage": "https://panda-federation-hq.pandafederation.workers.dev",
+      "listings": {
+        "devhunt": "https://devhunt.org/tool/panda-federation-hq",
+        "alternativeto": "https://alternativeto.net/software/panda-federation-h-q"
+      }
+    },
+    {
+      "id": "Spirit_Panda",
+      "name": "Spirit Panda",
+      "description": "Sovereign local-first AI companion with identity, memory, and adaptive prosody.",
+      "repo": "https://github.com/pandadad0214/Spirit_Panda",
+      "homepage": null,
+      "listings": {}
+    },
+    {
+      "id": "Orchid_Panda",
+      "name": "Orchid Panda",
+      "description": "Orchid Panda, a Panda Federation module.",
+      "repo": "https://github.com/pandadad0214/Orchid_Panda",
+      "homepage": null,
+      "listings": {}
+    },
+    {
+      "id": "Mythical_Panda",
+      "name": "Mythical Panda",
+      "description": "Mythical Panda, the creative and lore engine of the Panda Federation.",
+      "repo": "https://github.com/pandadad0214/Mythical_Panda",
+      "homepage": null,
+      "listings": {}
+    }
+  ]
+}
