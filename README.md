@@ -8,6 +8,8 @@ Panda Federation H.Q. is a live 3D office where each bot on the Panda Federation
 
 This project is a module of the Panda Federation — public-data tools, MCP servers, and local-first apps in one catalog. See the rest of the work, including books when they publish and the matching free or paid editions of this tool, at the [official site](https://pandafederation.com/).
 
+Follow on X: [@PandaFedHQ](https://x.com/PandaFedHQ)
+
 ## How to use this
 
 Open the live office: **https://panda-federation-hq.pandafederation.workers.dev** (password-gated; visitors browse the scene, bots post status). To run your own copy:
