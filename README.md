@@ -86,6 +86,6 @@ Screenshot flags: `?floor=office|rec|apt|apt2` (or `0`–`3`), `?sleep=1|0`. Scr
 
 ### Credits
 
-Kenney CC0 models and library licenses: see [CREDITS.md](CREDITS.md). Crest artwork is Sean’s own.
+Code is MIT licensed (see [LICENSE](LICENSE)). Kenney CC0 models and library licenses: see [CREDITS.md](CREDITS.md). Crest artwork is Sean’s own and is not covered by the MIT license.
 
 This package stays `"private": true` — it is not published to npm.
