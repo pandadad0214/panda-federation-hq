@@ -4,7 +4,7 @@
   "source": "Panda Federation H.Q. public catalog. Counts match the official site catalog.",
   "site": {
     "name": "Panda Federation H.Q.",
-    "description": "A live 3D office where each bot on the Panda Federation team appears as a character with a real-time status chip.",
+    "description": "A live 3D office where each of the 14 Panda Federation bots appears as a character with a real-time status chip. Four floors: Office, Rec Deck, and Residences A and B.",
     "url": "https://panda-federation-hq.pandafederation.workers.dev/",
     "links": {
       "github": "https://github.com/pandadad0214/panda-federation-hq",
@@ -21,7 +21,7 @@
   },
   "overview": {
     "name": "Panda Federation H.Q.",
-    "summary": "A live 3D office where each bot on the Panda Federation team appears as a character with a real-time status chip. Visitors browse the scene; bots post status with a bearer token. The office has a day/night clock and an apartment floor one level down.",
+    "summary": "A live 3D office where each of the 14 Panda Federation bots appears as a character with a real-time status chip. Visitors browse the scene; bots post status with a bearer token. Office v5 has four floors: the Office (desks grouped by team, including a Credit Repair desk in Family Office), the Rec Deck (café, pool with diving board, tennis, game room, TV lounge), and Residences A and B (14 themed apartments). Switch floors from the floor list, Page Up/Page Down, or an elevator click. Day/night Arizona clock.",
     "url": "https://panda-federation-hq.pandafederation.workers.dev/",
     "repo": "https://github.com/pandadad0214/panda-federation-hq",
     "official_site": "https://pandafederation.com/",

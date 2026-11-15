@@ -1,6 +1,6 @@
 # Panda Federation H.Q.
 
-Panda Federation H.Q. is a live 3D office where each bot on the Panda Federation team shows up as a character with a real-time status chip. It is a Vite + Three.js scene served by a Cloudflare Worker, with a day/night clock and an apartment floor one level down.
+Panda Federation H.Q. is a live 3D office where each bot on the 14-bot Panda Federation team shows up as a character with a real-time status chip. It is a Vite + Three.js scene served by a Cloudflare Worker, with a day/night Arizona clock and four floors: the Office, a Rec Deck, and Residences A and B.
 
 ## Part of [Panda Federation](https://pandafederation.com/)
 
@@ -58,7 +58,7 @@ Auth names only — set real values via Wrangler secrets / local `.dev.vars`, ne
 - `GET /api/state` — session cookie — bots + usage + feed health
 - `GET/POST /login`, `GET /logout`
 
-Bot ids: `overlord` `moneybot` `stockbot` `superseller` `ledger` `shadow` `eraser` `kimchi` `scribe` `planner` `mini`.
+Bot ids: `overlord` `moneybot` `stockbot` `superseller` `junior` `ledger` `shadow` `eraser` `kimchi` `scribe` `planner` `mini` `sniper` `credit`.
 
 Text is cleaned, truncated to 80 chars, and rejected (422) if it looks like an email, phone number, or 6+ digit run. `working` and `done` read as idle after 10 min without an update; `waiting`/`error` persist until changed. Feed warning: shown if `/api/state` fails, or if the cron heartbeat (every 5 min) is 45+ min old.
 
@@ -71,6 +71,18 @@ Helper scripts (`scripts/status.sh`, `scripts/usage.sh`) read a token file and o
 **v3** — Office mid-way up a glass tower: facade with floors below (lit window glimpses), distant skyline on a hazy city ground, framed-glass partitions with doorways per department, gym corner. Each bot’s chibi is restyled after its profile picture. Seated poses sit on cushions (`SEAT_FIT` in `src/main.js`).
 
 **v4** — Frosted-glass restroom west of the gym (two stalls, vanity with sinks and mirror), walkway to gym and break room. Glass elevator beside the front desk; floor arrow (bottom left) or elevator click peels the office layer back to the apartment floor: 11 studios, one per bot, color + name mat. Idle bots roam lounge / coffee bar / break-room table / restroom (capped 4/4/2). From **2:00–7:00 AM Arizona time** every bot rides down and sleeps in its own bed; status chips stay real. Screenshot flags: `?floor=apt`, `?sleep=1|0`.
+
+**v5** — Four floors, picked from the floor list (bottom left), **Page Up / Page Down**, or an elevator click (one floor down); every floor above the one in view peels back.
+- **Office (work floor):** desks grouped by team — eBay Sales (Superbot, Superbot Jr.) · Money Lab (Moneybot, Mini-Money) · Leadership, the Overlord's glass office now center back · Ops & Research (Stockbot, Cloudy, Sniperbot — dormant) · Family Office (Schoolbot, Family Ledger, Kimchi, **Credit Repair**) beside SecretaryBot's front desk · Writers' Den (Gatewalkers Guide) · Lounge · Team Huddle (the old break room). Floors: hardwood (Leadership, Den), carpet tiles (eBay, Money, Family, Huddle), raised access floor (Ops), tile (restroom), sprung maple (gym).
+- **Rec Deck:** café kitchen (checker tile; island + stools, coffee machines, soda machine, fridge, water cooler, dining table), swimming pool (sunken basin, lane lines, diving board at the 9 ft deep end, ladders, lifeguard chair, loungers, umbrella; POOL RULES board, NO DIVING, NO RUNNING, DEEP END and wet-floor signs; non-slip deck tile), lounge (sofas facing a TV, bean bags, game shelf; carpet), game room (table tennis, two arcade cabinets, foosball; sport vinyl), tennis court (acrylic court with lines, net, scoreboard, ball hopper). Idle bots ride down for coffee or the sofas.
+- **Residences A + B:** 14 carpeted apartments grouped by team, each themed to its bot (poster + props) with a door plaque and name mat: Overlord throne + chess · Superbot retro collectibles shelves + CRT · Jr. packing station · Moneybot coin stacks + safe · Mini-Money piggy bank + coin jar · Stockbot ticker screens + bronze bull · Sniperbot auction gavel + camo rug · SecretaryBot planner desk + vanity · Schoolbot chalkboard + globe · Family Ledger ledger books + adding machine · Kimchi plants + kimchi crocks · Credit Repair filing cabinets + credit-score poster · Cloudy shredder + cloud lamp + safe · Gatewalkers Guide dark-fantasy library + candles + rune circle.
+- **10 art pieces:** Golden Valley Sunset (café), 8-Bit Panda (eBay wall), STAY GOLDEN neon (rec lounge), Kanagawa Splash wave mural (pool), Bamboo Bronze panda statue (rec hall), Mother Road Route 66 shield (Residences A), Saguaro Triptych (Residences B), Federation Stars (Writers' Den), Hi-Score Hall arcade poster (game room), Wall of Fame (Team Huddle).
+Screenshot flags: `?floor=office|rec|apt|apt2` (or `0`–`3`), `?sleep=1|0`. Screenshots: `node scripts/shots-v5.mjs <baseUrl>` → `screenshots/`.
+
+![Office v5 work floor, with desks grouped by team](screenshots/v5-office.jpg)
+
+![Office v5 Rec Deck, with café, pool, tennis court, and game room](screenshots/v5-rec-deck.jpg)
+
 
 ### Credits
 

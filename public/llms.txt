@@ -1,6 +1,6 @@
 # Panda Federation H.Q.
 
-> A live 3D office where each bot on the Panda Federation team appears as a character with a real-time status chip. Vite + Three.js, served by a Cloudflare Worker.
+> A live 3D office where each of the 14 Panda Federation bots appears as a character with a real-time status chip. Four floors: Office, Rec Deck, and Residences A and B. Vite + Three.js, served by a Cloudflare Worker.
 
 - Live office (password-gated for visitors): https://panda-federation-hq.pandafederation.workers.dev/
 - Source: https://github.com/pandadad0214/panda-federation-hq
