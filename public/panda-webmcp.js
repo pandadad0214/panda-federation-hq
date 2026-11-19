@@ -14,8 +14,10 @@
  * navigator.modelContext / provideContext / unregisterTool were removed or
  * deprecated. This script only registers on document.modelContext.
  *
- * Declarative <form toolname> markup (removed from the spec in October 2026
- * but still scored by some scanners) is injected as visually hidden forms.
+ * No declarative <form toolname> markup is injected. Chrome's Declarative API
+ * expects tool forms to stay visible to the user, and hidden forms with the
+ * same names as the imperative tools could shadow them. Ordinary browsers see
+ * no change at all (no hidden DOM, no extra text).
  *
  * Boot: <script src="panda-webmcp.js" defer
  *          data-webmcp-catalog="webmcp-catalog.json"
@@ -398,45 +400,6 @@
     return tools;
   }
 
-  function describeForm(tool) {
-    var props = (tool.inputSchema && tool.inputSchema.properties) || {};
-    var required = (tool.inputSchema && tool.inputSchema.required) || [];
-    var html = "<form toolname=\"" + tool.name + "\" tooldescription=\"" + escapeAttr(tool.description) + "\" toolautosubmit=\"true\">";
-    Object.keys(props).forEach(function (name) {
-      var prop = props[name] || {};
-      var req = required.indexOf(name) !== -1 ? " required" : "";
-      html += "<label>" + escapeHtml(name) +
-        "<input name=\"" + escapeAttr(name) + "\" type=\"text\" toolparamdescription=\"" +
-        escapeAttr(prop.description || name) + "\"" + req + "></label>";
-    });
-    html += "</form>";
-    return html;
-  }
-
-  function escapeAttr(value) {
-    return text(value).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
-  }
-
-  function escapeHtml(value) {
-    return text(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  }
-
-  function injectForms(tools) {
-    if (document.querySelector("form[toolname]")) return;
-    if (!document.body) return;
-    var section = document.createElement("section");
-    section.className = "webmcp-tools";
-    section.setAttribute("aria-hidden", "true");
-    section.innerHTML = tools.map(describeForm).join("");
-    if (!document.getElementById("webmcp-visually-hidden-style")) {
-      var style = document.createElement("style");
-      style.id = "webmcp-visually-hidden-style";
-      style.textContent = ".webmcp-tools{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}";
-      document.head.appendChild(style);
-    }
-    document.body.appendChild(section);
-  }
-
   function catchRegister(promise) {
     if (promise && typeof promise.then === "function") {
       return promise.then(function () {}, function () {});
@@ -472,14 +435,13 @@
 
   function boot(catalog, scope) {
     var tools = buildTools(catalog, scope || "site");
-    injectForms(tools);
     function attempt() {
       if (registered) return Promise.resolve(true);
       return registerAll(tools);
     }
     attempt();
     if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", function () { attempt(); injectForms(tools); });
+      document.addEventListener("DOMContentLoaded", function () { attempt(); });
     }
     global.addEventListener("load", function () { attempt(); });
     var tries = 0;
